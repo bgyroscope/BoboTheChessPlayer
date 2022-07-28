@@ -1,5 +1,6 @@
 #!/bin/python
 
+# 2022.07.28 making sure I am using github correctly. 
 # 2022.07.26 test.py -- test the creations of the objects. 
 
 import chessBoard as cb
