@@ -4,7 +4,6 @@
 # chesspiece.py  ---   defines the piece objects 
 # 
 # Attributes: 
-#   loc -- location should be a alphanumeric coordinate, ie a1 or h8
 #   color --  "w" or "b" 
 #   direction -- array of directions it can move in specified by two integer arrays. 
 #   maxRange -- how far the piece can move in each of those directions 
@@ -18,8 +17,7 @@ class Piece:
 
     colordict = { 'w': 'white', 'b': 'black' } 
     
-    def __init__(self, loc, color ): 
-        self.loc = loc      # location ie a1  
+    def __init__(self, color ): 
         self.color = color  # color of the piece. Either w or b  
         # for motion
         self.direction = [] 
@@ -32,12 +30,12 @@ class Piece:
         return "x" 
 
     def getInfo(self): 
-        return 'On {}, there is a {}'.format( self.loc, self.colordict[ self.color ]   ) 
+        return 'This is a {}'.format( self.colordict[ self.color ]   ) 
 
 class Pawn(Piece):
 
-    def __init__(self, loc, color ): 
-        super().__init__(loc,color)
+    def __init__(self, color ): 
+        super().__init__(color)
         if self.color == 'w': 
             self.direction = [ [-1,0] ]     # a8 is 0,0 so w pawns move in -y direction 
             # self.capDirection = [ [-1,-1], [-1,1] ] 
@@ -70,8 +68,8 @@ class Pawn(Piece):
 
 class Knight(Piece): 
 
-    def __init__(self, loc, color ): 
-        super().__init__(loc,color)
+    def __init__(self, color ): 
+        super().__init__(color)
         self.direction = [ [-1,2], [1,2], [2,1], [2,-1], [1,-2], [-1,-2], [-2,-1], [-2,1] ]
         self.maxRange = 1   
 
@@ -94,8 +92,8 @@ class Knight(Piece):
 
 class Bishop(Piece): 
 
-    def __init__(self, loc, color ): 
-        super().__init__(loc,color)
+    def __init__(self, color ): 
+        super().__init__(color)
         self.direction =[ [1,1], [1,-1], [-1,-1], [-1,1] ] 
         self.maxRange = cb.Board.nrows -1  
 
@@ -120,8 +118,8 @@ class Bishop(Piece):
 
 class Rook(Piece): 
 
-    def __init__(self, loc, color ): 
-        super().__init__(loc,color)
+    def __init__(self,  color ): 
+        super().__init__(color)
         self.direction = [ [-1,0], [1,0], [0,-1], [0,1] ] 
         self.maxRange = cb.Board.nrows  -1
 
@@ -145,8 +143,8 @@ class Rook(Piece):
 
 class Queen(Piece): 
 
-    def __init__(self, loc, color ): 
-        super().__init__(loc,color)
+    def __init__(self,  color ): 
+        super().__init__(color)
         self.direction = [ [1,1], [1,-1], [-1,-1], [-1,1], [-1,0], [1,0], [0,-1], [0,1] ]
         self.maxRange = cb.Board.nrows - 1 
 
@@ -170,8 +168,8 @@ class Queen(Piece):
 
 class King(Piece): 
 
-    def __init__(self, loc, color ): 
-        super().__init__(loc,color)
+    def __init__(self,  color ): 
+        super().__init__(color)
         self.direction = [ [1,1], [1,-1], [-1,-1], [-1,1], [-1,0], [1,0], [0,-1], [0,1] ]
         self.maxRange = 1   
 
@@ -194,7 +192,7 @@ class King(Piece):
 
 
 
-def createPiece( char, loc  ): 
+def createPiece( char  ): 
     if char == char.lower():   # lowercase 
         color = 'b' 
     else: 
@@ -204,134 +202,22 @@ def createPiece( char, loc  ):
     char = char.lower() 
 
     if char == 'p': 
-        return Pawn( loc, color )
+        return Pawn(  color )
 
     elif char == 'n': 
-        return Knight( loc, color )  
+        return Knight(  color )  
 
     elif char == 'b': 
-        return Bishop( loc, color )  
+        return Bishop(  color )  
 
     elif char == 'r': 
-        return Rook( loc, color )  
+        return Rook(  color )  
 
     elif char == 'q': 
-        return Queen( loc, color )  
+        return Queen(  color )  
 
     elif char == 'k': 
-        return King( loc, color )  
+        return King(  color )  
 
 
 
-# 
-# 
-# 
-# 
-# 
-# # subclasses below of each type of pieces 
-# class Pawn(Piece):
-# 
-#     def __init__(self, loc, color ): 
-#         super().__init__(loc,color)
-#         if self.color == 'w': 
-#             self.direction = [ [0,-1] ]     # a8 is 0,0 so w pawns move in -y direction 
-#             self.capDirection = [ [-1,-1], [1,-1] ] 
-#         else: 
-#             self.direction = [ [0, 1] ] 
-#             self.capDirection = [ [-1,1], [1, 1]  ]  
-# 
-#         self.maxRange = 1   # how far it can move forward usually 
-#         self.capMaxRange = 1 
-# 
-#     def __repr__(self): 
-#         return super().__repr__() + ' pawn' 
-# 
-# 
-# class Knight(Piece): 
-# 
-#     def __init__(self, loc, color ): 
-#         super().__init__(loc,color)
-#         self.direction = [ [-1,2], [1,2], [2,1], [2,-1], [1,-2], [-1,-2], [-2,-1], [-2,1] ]
-#         self.maxRange = 1   
-# 
-#     def __repr__(self): 
-#         return super().__repr__() + ' knight'
-# 
-# 
-# class Bishop(Piece): 
-# 
-#     def __init__(self, loc, color ): 
-#         super().__init__(loc,color)
-#         self.direction =[ [1,1], [1,-1], [-1,-1], [-1,1] ] 
-#         self.maxRange = cb.Board.nrows -1  
-# 
-#     def __repr__(self): 
-#         return super().__repr__() + ' bishop'
-# 
-# class Rook(Piece): 
-# 
-#     def __init__(self, loc, color ): 
-#         super().__init__(loc,color)
-#         self.direction = [ [-1,0], [1,0], [0,-1], [0,1] ] 
-#         self.maxRange = cb.Board.nrows  -1
-# 
-# 
-#     def __repr__(self): 
-#         return super().__repr__() + ' rook'
-# 
-# 
-# class Queen(Piece): 
-# 
-#     def __init__(self, loc, color ): 
-#         super().__init__(loc,color)
-#         self.direction = [ [1,1], [1,-1], [-1,-1], [-1,1], [-1,0], [1,0], [0,-1], [0,1] ]
-#         self.maxRange = cb.Board.nrows - 1 
-# 
-# 
-#     def __repr__(self): 
-#         return super().__repr__() + ' queen'
-# 
-# 
-# 
-# class King(Piece): 
-# 
-#     def __init__(self, loc, color ): 
-#         super().__init__(loc,color)
-#         self.direction = [ [1,1], [1,-1], [-1,-1], [-1,1], [-1,0], [1,0], [0,-1], [0,1] ]
-#         self.maxRange = 1   
-# 
-# 
-#     def __repr__(self): 
-#         return super().__repr__() + ' king'
-# 
-# 
-# 
-# 
-# def createPiece( char, loc  ): 
-#     if char == char.lower():   # lowercase 
-#         color = 'b' 
-#     else: 
-#         color = 'w' 
-# 
-# 
-#     char = char.lower() 
-# 
-#     if char == 'p': 
-#         return Pawn( loc, color )
-# 
-#     elif char == 'n': 
-#         return Knight( loc, color )  
-# 
-#     elif char == 'b': 
-#         return Bishop( loc, color )  
-# 
-#     elif char == 'r': 
-#         return Rook( loc, color )  
-# 
-#     elif char == 'q': 
-#         return Queen( loc, color )  
-# 
-#     elif char == 'k': 
-#         return King( loc, color )  
-# 
-# 

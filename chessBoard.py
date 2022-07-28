@@ -81,7 +81,7 @@ class Board:
                     c += int(char) 
                 else: 
                     # found a piece in input str 
-                    self.arr[r][c] = cp.createPiece( char, gf.numToCoor([r,c]) ) 
+                    self.arr[r][c] = cp.createPiece( char  ) 
 
                     c += 1 
 
