@@ -110,6 +110,50 @@ class Board:
 
 
 
+    def checkStatus(self, color, moveArr=None): 
+        ''' check the status of the game ---> for now use number of kings or valid moves as a proxy
+            color = 'w' or 'b' 
+            moveArr is the result from possibleMoves. None by default to indicate that we must call possibleMoves   
+                returns "in prog", "invalid", "draw", "checkmate" 
+        ''' 
+
+        # find the kings 
+        nw, nb = self.findKings()
+        if nw == 0 and  nb == 0 or nw > 1 or nb > 1:
+            return "invalid" 
+
+        if nw == 1 and nb == 1: 
+
+            if not moveArr: 
+                moveArr = self.possibleMoves( color ) 
+
+            if moveArr == []: 
+                return "draw" 
+            else: return "in prog" 
+
+        else: 
+            if (color == 'w' and nw == 0 ) or ( color == 'b' and nb == 0 ):  
+                return "checkmate"  
+            else: 
+                return "invalid"
+
+
+    def findKings( self) : 
+        ''' returns number of white then number of black kings ''' 
+        nw = 0 
+        nb = 0 
+
+        for row in self.arr: 
+            for p in row: 
+                if isinstance( p, cp.King ) : 
+                    if p.color == 'w' : nw += 1
+                    else: nb += 1 
+
+        return [nw,nb] 
+
+
+
+
     def possibleMoves(self, color ): 
         ''' find the valid moves on the board for pieces of given color
             color = 'w' or 'b' 
@@ -126,17 +170,17 @@ class Board:
                     for direc in p.direction: 
                         for j in range(1,p.maxRange+1):
                             # continue to add valid moves until it encounters another piece. 
-                            x, y = r+direc[0]*j ,  c + direc[1] * j 
+                            newr, newc = r+direc[0]*j ,  c + direc[1] * j 
 
-                            if x<0 or x >= self.nrows or y < 0 or y >= self.nrows: 
+                            if newr<0 or newr >= self.nrows or newc < 0 or newc >= self.nrows: 
                                 break 
 
-                            end = gf.numToCoor( [ x, y  ]  ) 
+                            end = gf.numToCoor( [ newr, newc  ]  ) 
 
-                            if self.arr[ x ][ y ]   == None: 
+                            if self.arr[ newr ][ newc ]   == None: 
                                 moveArr.append(  cm.Simple( begin, end )  ) 
 
-                            elif self.arr[x][y].color != color :
+                            elif self.arr[newr][newc].color != color :
                                 moveArr.append( cm.Capture( begin, end )  )
                                 break 
                                 

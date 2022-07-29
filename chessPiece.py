@@ -5,7 +5,7 @@
 # 
 # Attributes: 
 #   color --  "w" or "b" 
-#   direction -- array of directions it can move in specified by two integer arrays. 
+#   direction -- array of directions it can move in row then in column direction.  
 #   maxRange -- how far the piece can move in each of those directions 
 #       ** special for pawns -- capDirection, capMaxRange   for capture directions
 
@@ -14,8 +14,6 @@ import chessBoard as cb
 
 
 class Piece:
-
-    colordict = { 'w': 'white', 'b': 'black' } 
     
     def __init__(self, color ): 
         self.color = color  # color of the piece. Either w or b  
@@ -30,7 +28,7 @@ class Piece:
         return "x" 
 
     def getInfo(self): 
-        return 'This is a {}'.format( self.colordict[ self.color ]   ) 
+        return 'This is a {}'.format( gf.colordict[ self.color ]   ) 
 
 class Pawn(Piece):
 

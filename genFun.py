@@ -4,6 +4,8 @@
 # genFun.py -- general functions that will be useful 
 
 
+colordict = { 'w': 'white', 'b': 'black' } 
+
 def coorToNum( loc ): 
     ''' convert square location a1 etc  to numbers in array  7,0 ''' 
     rowdict = { '1': 7, '2': 6, '3': 5, '4': 4, '5': 3, '6': 2, '7': 1, '8': 0 };   
