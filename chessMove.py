@@ -34,6 +34,45 @@ class Capture(Move):
     def __repr__(self): 
         return super().__repr__() + ' as a capture. ' 
 
+# Pawn move subclasses ----------------------------------------------------
+class PawnMove(Move): 
+    def __init__(self, begin, end): 
+        super().__init__(begin, end)
+
+
+    def __repr__(self): 
+        return super().__repr__()  
+
+class PawnOneSquare(PawnMove): 
+    def __init__(self, begin, end): 
+        super().__init__(begin, end)
+
+    def __repr__(self): 
+        return super().__repr__() + ' as a pawn one step advance. ' 
+
+
+class PawnTwoSquare(PawnMove): 
+    def __init__(self, begin, end): 
+        super().__init__(begin, end)
+
+
+    def __repr__(self): 
+        return super().__repr__() + ' as a pawn two step advance. ' 
+
+class PawnEP(PawnMove): 
+    def __init__(self, begin, end): 
+        super().__init__(begin, end)
+
+    def __repr__(self): 
+        return super().__repr__() + ' as a pawn ep capture. ' 
+
+
+    
+
+   
+
+
+
 
 
 

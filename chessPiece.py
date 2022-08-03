@@ -36,13 +36,12 @@ class Pawn(Piece):
         super().__init__(color)
         if self.color == 'w': 
             self.direction = [ [-1,0] ]     # a8 is 0,0 so w pawns move in -y direction 
-            # self.capDirection = [ [-1,-1], [-1,1] ] 
+            self.capDirection = [ [-1,-1], [-1,1] ] 
         else: 
             self.direction = [ [1,0] ] 
-            # self.capDirection = [ [1,-1], [1, 1]  ]  
+            self.capDirection = [ [1,-1], [1, 1]  ]  
 
         self.maxRange = 1   # how far it can move forward usually 
-        # self.capMaxRange = 1 
 
     def __repr__(self): 
         if self.color == 'w': 

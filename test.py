@@ -12,6 +12,7 @@ import chessPlayer as cp
 import random
 
 
+
 # board = cb.Board( '1K6/8/8/4pP2/8/8/8/8 w - - 0 1' )    # only white king
 # board = cb.Board( '1Q2k3/8/8/4pP2/8/8/8/8 w - - 0 1' )  # only black king    
 # board = cb.Board( '1K2k3/8/8/4pP2/8/8/8/8 w - - 0 1' )  # one of each
@@ -20,7 +21,28 @@ board = cb.Board( '1K2k3/8/8/4pP2/8/8/8/8 w - - 0 1' )  # one of each
 # board = cb.Board( '6PK/6PP/8/8/8/8/pp6/kp6 w - - 0 1' )  # no moves are possible 
 
 
-board = cb.Board( '8/8/8/4pP2/8/8/8/8 w - - 0 1' )  # one of each
+# board = cb.Board( '8/8/8/4pP2/8/8/8/8 w - - 0 1' )  # one of each
+
+# testing out my pawns 
+# initialFEN = "rnbqkbnr/2pppp2/8/8/8/8/2PPPP2/RNBQKBNR/ w kqKQ - 0 1" 
+# initialFEN = "8/p7/8/8/8/8/1P6/8/ w kqKQ e3 24 1" 
+# initialFEN = "8/p7/8/8/3pP3/8/8/8/ b kqKQ e3 24 1"   # ep position 
+initialFEN = "8/p7/8/3pP3/8/8/8/8/ w kqKQ d6 24 1"   # ep position 
+board = cb.Board( initialFEN  ) 
+
+
+for i in range(1): 
+    board.display() 
+    print( board.FEN) 
+    
+    possMoves = board.possibleMoves( board.toMove ) 
+    for move in possMoves: 
+        print(move) 
+    
+    board.executeMove( possMoves[1] ) 
+
+
+board.display() 
 
 # board = cb.Board( "8/8/5P2/8/4p3/8/8/8 w - - 2 2" )
 
@@ -50,15 +72,15 @@ board = cb.Board( '8/8/8/4pP2/8/8/8/8 w - - 0 1' )  # one of each
 #         break 
 
 
-board = cb.Board( '1K2k3/8/8/4pP2/8/8/8/8 w - - 0 1' )  # one of each
-board.display() 
-ben = cp.human( 'w' ) 
-
-possMoves = board.possibleMoves( board.toMove  )
-move = ben.decideMove( board, possMoves ) 
-
-board.executeMove( move ) 
-board.display() 
+# board = cb.Board( '1K2k3/8/8/4pP2/8/8/8/8 w - - 0 1' )  # one of each
+# board.display() 
+# ben = cp.human( 'w' ) 
+# 
+# possMoves = board.possibleMoves( board.toMove  )
+# move = ben.decideMove( board, possMoves ) 
+# 
+# board.executeMove( move ) 
+# board.display() 
 
 
 # print( 'number of white and black kings: ', board.findKings() ) 
