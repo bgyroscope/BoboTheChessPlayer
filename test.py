@@ -26,23 +26,34 @@ board = cb.Board( '1K2k3/8/8/4pP2/8/8/8/8 w - - 0 1' )  # one of each
 # testing out my pawns 
 # initialFEN = "rnbqkbnr/2pppp2/8/8/8/8/2PPPP2/RNBQKBNR/ w kqKQ - 0 1" 
 # initialFEN = "8/p7/8/8/8/8/1P6/8/ w kqKQ e3 24 1" 
-# initialFEN = "8/p7/8/8/3pP3/8/8/8/ b kqKQ e3 24 1"   # ep position 
-initialFEN = "8/p7/8/3pP3/8/8/8/8/ w kqKQ d6 24 1"   # ep position 
+# initialFEN = "8/pppppppp/8/8/8/8/PPPPPPPP/8/ w kqKQ - 0 1" 
+
+#  # # initial board 
+# initialFEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR/ w kqKQ - 0 1" 
+
+# initialFEN = "8/p7/8/3pP3/8/8/8/8/ w kqKQ d6 24 1"   # ep position 
+
+initialFEN = "8/p6P/8/8/3pP3/8/3p4/8/ w kqKQ e3 24 1"   # ep position 
+
+
 board = cb.Board( initialFEN  ) 
 
 
-for i in range(1): 
+for i in range(3): 
     board.display() 
     print( board.FEN) 
-    
+
+    print(  board.toMove, board.castleRights, board.epRights, board.halfMoveClock, board.fullMoveNumber ) 
+
+
     possMoves = board.possibleMoves( board.toMove ) 
     for move in possMoves: 
         print(move) 
     
-    board.executeMove( possMoves[1] ) 
+    board.executeMove( possMoves[3] ) 
 
-
-board.display() 
+# 
+# board.display() 
 
 # board = cb.Board( "8/8/5P2/8/4p3/8/8/8 w - - 2 2" )
 

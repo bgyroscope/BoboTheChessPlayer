@@ -66,8 +66,16 @@ class PawnEP(PawnMove):
     def __repr__(self): 
         return super().__repr__() + ' as a pawn ep capture. ' 
 
+ 
+class PawnPromote(PawnMove): 
+    def __init__(self, begin, end, promoteFlag='Q'): 
+        super().__init__(begin, end)
+        self.promoteFlag = promoteFlag
 
-    
+    def __repr__(self): 
+        return super().__repr__() + ' as a pawn promotion to {}. ' .format( self.promoteFlag ) 
+
+   
 
    
 

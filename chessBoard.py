@@ -45,13 +45,20 @@ class Board:
         return self.FEN
 
     def display(self): 
+
+        # dictionary for converting from string rep to unicode 
+        helpdict ={ 'K': '\u2654',  'Q': '\u2655', 'R': '\u2656', 'B': '\u2657', 'N': '\u2658', 'P': '\u2659',
+                    'k': '\u265A',  'q': '\u265B', 'r': '\u265C', 'b': '\u265D', 'n': '\u265E', 'p': '\u265F'
+        }  
+
         print( ) 
         for i, row in enumerate( self.arr ):  
             print( "  " + "-" * 32  ) 
             print( str(8-i) + " ", end = "| " ) 
             for elm in row: 
                 if elm: 
-                    print( elm, end=" | " ) 
+                    # print( elm, end=" | " ) 
+                    print( helpdict[str(elm)], end=" | " ) 
                 else: 
                     print( " ", end=" | " ) 
             print() 
@@ -187,11 +194,15 @@ class Board:
 
                             end = gf.numToCoor( [ newr, newc  ]  ) 
 
-                            # promotion  --- condition of making it to the last rank 
-
                             if self.arr[ newr ][ newc ]   == None: 
-                                if j == 1: 
+                                if j == 1 and (newr==0 or newr==7 ): 
+                                    # promotion -- (assuming pawns don't move backwards, ie white pawn can't get to newr==7) 
+                                    for flag in [ 'Q', 'R', 'B', 'N' ] : 
+                                        moveArr.append(  cm.PawnPromote( begin, end, flag )  ) 
+
+                                elif j == 1: 
                                     moveArr.append(  cm.PawnOneSquare( begin, end )  ) 
+
                                 else: 
                                     moveArr.append(  cm.PawnTwoSquare( begin, end )  ) 
 
@@ -213,7 +224,7 @@ class Board:
                                 continue 
                                
                             # check for ep here 
-                            elif [newr, newc] == gf.coorToNum( self.epRights ): 
+                            elif self.epRights != '-' and [newr, newc] == gf.coorToNum( self.epRights ): 
                                 moveArr.append( cm.PawnEP(begin, end) )
                                 continue
 
@@ -273,7 +284,16 @@ class Board:
                 self.arr[ e[0]+1 ][ e[1] ] = None 
             else: # b
                 self.arr[ e[0]-1 ][ e[1] ] = None 
-                
+
+        elif isinstance( move, cm.PawnPromote): 
+            # promotion depends on whose move it is
+            if self.toMove == 'w': 
+                char = move.promoteFlag.upper() 
+            else: # black 
+                char = move.promoteFlag.lower() 
+
+            self.arr[e[0] ][ e[1] ] = cp.createPiece( char  )  
+
 
         # update the FEN and other variables 
         # eventually include flags for updating ep, castling, and halfMoveClock
