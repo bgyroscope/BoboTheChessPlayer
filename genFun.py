@@ -12,7 +12,7 @@ def coorToNum( loc ):
     coldict = { 'a': 0, 'b': 1, 'c': 2, 'd': 3, 'e': 4, 'f': 5, 'g': 6, 'h': 7 }; 
 
     if len(loc) != 2 or loc[0] not in coldict or loc[1] not in rowdict: 
-        print( 'Invalid Coordinate in function coorToNum ' ) 
+        print( 'Invalid Coordinate in function coorToNum:  ', loc ) 
         return [] 
 
     else: 

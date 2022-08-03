@@ -220,7 +220,7 @@ class Board:
                                 continue 
                                
                             # check for ep here 
-                            elif [newr, newc] == gf.coorToNum( self.epRights ): 
+                            elif self.epRights != '-' and [newr, newc] == gf.coorToNum( self.epRights ): 
                                 moveArr.append( cm.PawnEP(begin, end) )
                                 continue
 

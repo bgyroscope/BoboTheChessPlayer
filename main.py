@@ -11,8 +11,8 @@ import chessMove  as cm
 import chessPlayer as cp
 
 
-initialFEN = "rnbqkbnr/8/8/8/8/8/8/RNBQKBNR/ w kqKQ - 0 1" 
-initialFEN = "rnbqkbnr/2pppp2/8/8/8/8/2PPPP2/RNBQKBNR/ w kqKQ - 0 1" 
+# initialFEN = "rnbqkbnr/8/8/8/8/8/8/RNBQKBNR/ w kqKQ - 0 1" 
+initialFEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR/ w kqKQ - 0 1" 
 
 
 score = [ 0, 0] 
