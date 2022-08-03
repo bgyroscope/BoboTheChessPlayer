@@ -194,11 +194,15 @@ class Board:
 
                             end = gf.numToCoor( [ newr, newc  ]  ) 
 
-                            # promotion  --- condition of making it to the last rank 
-
                             if self.arr[ newr ][ newc ]   == None: 
-                                if j == 1: 
+                                if j == 1 and (newr==0 or newr==7 ): 
+                                    # promotion -- (assuming pawns don't move backwards, ie white pawn can't get to newr==7) 
+                                    for flag in [ 'Q', 'R', 'B', 'N' ] : 
+                                        moveArr.append(  cm.PawnPromote( begin, end, flag )  ) 
+
+                                elif j == 1: 
                                     moveArr.append(  cm.PawnOneSquare( begin, end )  ) 
+
                                 else: 
                                     moveArr.append(  cm.PawnTwoSquare( begin, end )  ) 
 
@@ -280,7 +284,16 @@ class Board:
                 self.arr[ e[0]+1 ][ e[1] ] = None 
             else: # b
                 self.arr[ e[0]-1 ][ e[1] ] = None 
-                
+
+        elif isinstance( move, cm.PawnPromote): 
+            # promotion depends on whose move it is
+            if self.toMove == 'w': 
+                char = move.promoteFlag.upper() 
+            else: # black 
+                char = move.promoteFlag.lower() 
+
+            self.arr[e[0] ][ e[1] ] = cp.createPiece( char  )  
+
 
         # update the FEN and other variables 
         # eventually include flags for updating ep, castling, and halfMoveClock
