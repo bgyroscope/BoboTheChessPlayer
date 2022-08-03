@@ -45,13 +45,20 @@ class Board:
         return self.FEN
 
     def display(self): 
+
+        # dictionary for converting from string rep to unicode 
+        helpdict ={ 'K': '\u2654',  'Q': '\u2655', 'R': '\u2656', 'B': '\u2657', 'N': '\u2658', 'P': '\u2659',
+                    'k': '\u265A',  'q': '\u265B', 'r': '\u265C', 'b': '\u265D', 'n': '\u265E', 'p': '\u265F'
+        }  
+
         print( ) 
         for i, row in enumerate( self.arr ):  
             print( "  " + "-" * 32  ) 
             print( str(8-i) + " ", end = "| " ) 
             for elm in row: 
                 if elm: 
-                    print( elm, end=" | " ) 
+                    # print( elm, end=" | " ) 
+                    print( helpdict[str(elm)], end=" | " ) 
                 else: 
                     print( " ", end=" | " ) 
             print() 
