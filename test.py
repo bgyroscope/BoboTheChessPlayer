@@ -33,13 +33,14 @@ board = cb.Board( '1K2k3/8/8/4pP2/8/8/8/8 w - - 0 1' )  # one of each
 
 # initialFEN = "8/p7/8/3pP3/8/8/8/8/ w kqKQ d6 24 1"   # ep position 
 
-initialFEN = "8/p6P/8/8/3pP3/8/3p4/8/ w kqKQ e3 24 1"   # ep position 
+# initialFEN = "8/p6P/8/8/3pP3/8/3p4/8/ w kqKQ e3 24 1"   # ep position 
+initialFEN = "1k6/8/1K6/8/8/8/8/3Q4/ w - - 24 1"   # ep position 
 
 
 board = cb.Board( initialFEN  ) 
 
 
-for i in range(3): 
+for i in range(1): 
     board.display() 
     print( board.FEN) 
 

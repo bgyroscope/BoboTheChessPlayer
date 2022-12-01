@@ -117,15 +117,18 @@ class Board:
 
 
 
-    def checkStatus(self, color, moveArr=None): 
+    def checkStatus(self, color, moveArr=[] ): 
         ''' check the status of the game ---> for now use number of kings or valid moves as a proxy
             color = 'w' or 'b' 
-            moveArr is the result from possibleMoves. None by default to indicate that we must call possibleMoves   
+            moveArr is the result from possibleMoves. empty array by default to indicate that we must call possibleMoves   
                 returns "in prog", "invalid", "draw", "checkmate" 
         ''' 
 
         # find the kings 
-        nw, nb = self.findKings()
+        # nw, nb = self.findKings()
+        wkloc, bkloc = self.findKings()
+        nw, nb = len(wkloc), len(bkloc) 
+
         if nw == 0 and  nb == 0 or nw > 1 or nb > 1:
             return "invalid" 
 
@@ -146,17 +149,20 @@ class Board:
 
 
     def findKings( self) : 
-        ''' returns number of white then number of black kings ''' 
-        nw = 0 
-        nb = 0 
+        ''' returns locations of white then number of black kings ''' 
+        wkloc = []  # white king location 
+        bkloc = [] 
 
-        for row in self.arr: 
-            for p in row: 
+        for r, row in enumerate( self.arr ): 
+            for j, p in enumerate(row): 
                 if isinstance( p, cp.King ) : 
-                    if p.color == 'w' : nw += 1
-                    else: nb += 1 
+                    # if p.color == 'w' : nw += 1
+                    # else: nb += 1 
+                    if p.color == 'w' : wkloc += [gf.numToCoor([r,c]) ]
+                    else: bkloc += [gf.numToCoor([r,c]) ]  
 
-        return [nw,nb] 
+        # return [nw,nb] 
+        return [wkloc,bkloc] 
 
 
 
@@ -260,7 +266,7 @@ class Board:
                                     # cannot move to square with own piece 
                                     break  
 
-        # now also consider the special moves like ep and castling 
+        # now also consider the special moves of  castling  (ep above) 
         # also must check if a move puts the player in check 
 
         return moveArr 
