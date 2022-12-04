@@ -33,25 +33,35 @@ board = cb.Board( '1K2k3/8/8/4pP2/8/8/8/8 w - - 0 1' )  # one of each
 
 # initialFEN = "8/p7/8/3pP3/8/8/8/8/ w kqKQ d6 24 1"   # ep position 
 
-# initialFEN = "8/p6P/8/8/3pP3/8/3p4/8/ w kqKQ e3 24 1"   # ep position 
-initialFEN = "1k6/8/1K6/8/8/8/8/3Q4/ w - - 24 1"   # ep position 
-
+# initialFEN = "1kr3R1/1p6/1K6/8/8/8/8/8/ w - - 24 1"   # testing check. 
+initialFEN = "1kr3R1/1p6/1K6/8/8/8/8/8/ b - - 24 1"   # testing check. 
+initialFEN = "2kr4/8/8/2pP4/8/8/3K4/8 w - c6 0 2"    # testing check with ep case.  
+initialFEN = "2k5/8/8/8/8/8/5q2/7K w - - 8 13"      # stalemate 
 
 board = cb.Board( initialFEN  ) 
+board.display() 
+print( board.FEN ) 
+print( 'Kings at: ' , board.findKings()  )  
+print( 'Is the white king in check?' , board.inCheck('w')  )
+print( 'Is the black king in check?' , board.inCheck('b')  )
 
+print( 'Possible Moves for' , board.toMove, ': ', board.possibleMoves(board.toMove) )
+print( 'Valid Moves for' , board.toMove, ': ', board.validMoves(board.toMove) )
 
-for i in range(1): 
-    board.display() 
-    print( board.FEN) 
+print( 'Board status: ', board.checkStatus(board.toMove) )
 
-    print(  board.toMove, board.castleRights, board.epRights, board.halfMoveClock, board.fullMoveNumber ) 
-
-
-    possMoves = board.possibleMoves( board.toMove ) 
-    for move in possMoves: 
-        print(move) 
-    
-    board.executeMove( possMoves[3] ) 
+# for i in range(1): 
+#     board.display() 
+#     print( board.FEN) 
+# 
+#     print(  board.toMove, board.castleRights, board.epRights, board.halfMoveClock, board.fullMoveNumber ) 
+# 
+# 
+#     possMoves = board.possibleMoves( board.toMove ) 
+#     for move in possMoves: 
+#         print(move) 
+#     
+#     board.executeMove( possMoves[3] ) 
 
 # 
 # board.display() 

@@ -120,7 +120,7 @@ class Board:
     def checkStatus(self, color, moveArr=[] ): 
         ''' check the status of the game ---> for now use number of kings or valid moves as a proxy
             color = 'w' or 'b' 
-            moveArr is the result from possibleMoves. empty array by default to indicate that we must call possibleMoves   
+            moveArr is the result from validMoves. empty array by default to indicate that we must call validMoves   
                 returns "in prog", "invalid", "draw", "checkmate" 
         ''' 
 
@@ -135,7 +135,8 @@ class Board:
         if nw == 1 and nb == 1: 
 
             if not moveArr: 
-                moveArr = self.possibleMoves( color ) 
+                # moveArr = self.possibleMoves( color ) 
+                moveArr = self.validMoves( color ) 
 
             if moveArr == []: 
                 return "draw" 
@@ -154,7 +155,7 @@ class Board:
         bkloc = [] 
 
         for r, row in enumerate( self.arr ): 
-            for j, p in enumerate(row): 
+            for c, p in enumerate(row): 
                 if isinstance( p, cp.King ) : 
                     # if p.color == 'w' : nw += 1
                     # else: nb += 1 
@@ -166,9 +167,73 @@ class Board:
 
 
 
+    def inCheck(self, color, moveArr=[]):
+        ''' function determines if player of color 'color' is in chekc. 
+        color = 'w' or 'b'. 
+        moveArr is the possible moves. If None, then possible moves is called. 
+        Return True or False. '''
+        # get the king location.
+        wkloc, bkloc = self.findKings()
+        if color == 'w': 
+            kingloc = wkloc[0];  
+            # otherColor = 'b'
+        else: 
+            kingloc = bkloc[0];  
+            # otherColor = 'w'
+        
 
+        # if not moveArr: 
+        #     moveArr = self.possibleMoves( otherColor )
+
+
+        for move in moveArr: 
+            if move.end == kingloc: 
+                return True 
+
+
+        return False 
+
+
+
+    def validMoves(self, color, moveArr=[]): 
+        ''' determines all valid moves on the board for pieces of a given color, handling isues of check. 
+        color = 'w' or 'b' (color of player to move)
+        Return an array of valid moves (move objects) ''' 
+
+        if not moveArr: 
+            moveArr = self.possibleMoves(color) 
+
+
+        if color == 'w': otherColor = 'b'
+        else: otherColor = 'w' 
+
+
+        validMoveArr = [] 
+
+        for move in moveArr: 
+
+            # print( self.FEN) 
+
+            # check if King is in check after the move.
+            tempBoard = Board( self.FEN ) 
+            tempBoard.executeMove( move )
+            moveArr = tempBoard.possibleMoves( tempBoard.toMove ) 
+
+            # print( move) 
+            # self.display()  
+            # tempBoard.display() 
+            # print( 'Is ', color, ' in check?', tempBoard.inCheck(color) ) 
+
+            if not tempBoard.inCheck( color, moveArr  ):  
+                validMoveArr.append(move)  
+
+
+        return validMoveArr 
+
+
+    ## finds all the possible moves for a player ignoring check issues.  
     def possibleMoves(self, color ): 
-        ''' find the valid moves on the board for pieces of given color
+        ''' find the valid moves on the board for pieces of given color. 
             color = 'w' or 'b' (color of the person to move. (Probably should be board.toMove)  
             Return an array of possible moves -- move objects ''' 
 
@@ -317,7 +382,11 @@ class Board:
                     j += 1 
 
                 else: 
-                    outstr = outstr +  str(j)  + self.arr[r][c].__str__() 
+                    if j!=0: 
+                        outstr = outstr +  str(j)  + self.arr[r][c].__str__() 
+                    else: 
+                        outstr = outstr + self.arr[r][c].__str__() 
+
                     j = 0 
 
             if j != 0 : 

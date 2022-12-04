@@ -43,12 +43,15 @@ while True:
     while board.checkStatus(board.toMove) == "in prog": 
         
         board.display() 
-        possMoves = board.possibleMoves( board.toMove ) 
+        # possMoves = board.possibleMoves( board.toMove ) 
+        validMoves = board.validMoves( board.toMove ) 
     
         if player1.color == board.toMove: 
-            move = player1.decideMove( board, possMoves )
+            # move = player1.decideMove( board, possMoves )
+            move = player1.decideMove( board, validMoves )
         else: # player2.color == board.toMove
-            move =  player2.decideMove( board, possMoves ) 
+            # move =  player2.decideMove( board, possMoves ) 
+            move =  player2.decideMove( board, validMoves ) 
     
         board.executeMove( move ) 
     
