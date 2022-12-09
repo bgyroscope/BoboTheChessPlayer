@@ -27,7 +27,7 @@ from typedefs import (
     PieceChar,
     ColorChar,
     ColorRGBA,
-    Point
+    Coord
 )
 from gui import Displayable, Image
 from chessGame import Game
@@ -46,8 +46,8 @@ class Board(Displayable):
     _boardImage: Image
     _piecesImage: Image
     _cellSize: int
-    _hoveredSquare: (Point | None)
-    _selectedSquare: (Point | None)
+    _hoveredSquare: (Coord | None)
+    _selectedSquare: (Coord | None)
 
     def __init__(self,
                  game: Game,
@@ -82,13 +82,11 @@ class Board(Displayable):
         board = self._boardImage.render()
 
         # Pieces
-        for i in range(self._game.numRows):
-            for j in range(self._game.numCols):
-                piece = self._game.getPieceAt(i, j)
-                if piece is not None:
-                    sprite = self._getPieceSprite(piece)
-                    position = (j * self._cellSize, i * self._cellSize)
-                    board.blit(sprite, position)
+        for row, col, piece in self._game.enumerateBoard():
+            if piece is not None:
+                sprite = self._getPieceSprite(piece)
+                position = (col * self._cellSize, row * self._cellSize)
+                board.blit(sprite, position)
 
         # Highlighted squares
         if self._selectedSquare is not None:
@@ -99,11 +97,16 @@ class Board(Displayable):
             row, col = self._hoveredSquare
             self._highlightSquare(board, row, col, SQUARE_HOVER_COLOR)
 
+        for color in [ColorChar.WHITE, ColorChar.BLACK]:
+            if self._game.inCheck(color):
+                row, col = self._game.findKing(color)
+                self._highlightSquare(board, row, col, (255, 0, 0, 128))
+
         return board
 
     def _highlightMoves(self, board: Surface):
         row, col = self._selectedSquare  # type: ignore
-        moves = self._game.getAvaiableMoves(row, col)
+        moves = self._game.getPieceLegalMoves(row, col)
         for move in moves:
             row, col = move.end
             # darker highlight for hovered moves
@@ -133,12 +136,12 @@ class Board(Displayable):
 
     def _onMouseMove(self, event: Event):
         mouseX, mouseY = event.pos
-        coords = self._screenPosToSquare(mouseX, mouseY)
+        coords = self._screenPosToCoord(mouseX, mouseY)
         self._hoveredSquare = coords
 
     def _onMouseClick(self, event: Event):
         mouseX, mouseY = event.pos
-        coords = self._screenPosToSquare(mouseX, mouseY)
+        coords = self._screenPosToCoord(mouseX, mouseY)
 
         if self._selectedSquare is None:
             piece = self._game.getPieceAt(coords[0], coords[1])
@@ -146,14 +149,14 @@ class Board(Displayable):
                 self._selectedSquare = coords
         else:
             row, col = self._selectedSquare
-            moves = self._game.getAvaiableMoves(row, col)
+            moves = self._game.getPieceLegalMoves(row, col)
             selectedMove = next(
                 (move for move in moves if move.end == coords), None)
             if selectedMove is not None:
                 self._game.executeMove(selectedMove)
             self._selectedSquare = None
 
-    def _screenPosToSquare(self, x: int, y: int) -> Point:
+    def _screenPosToCoord(self, x: int, y: int) -> Coord:
         col = x // self._cellSize
         row = y // self._cellSize
         return (row, col)

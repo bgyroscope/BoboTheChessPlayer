@@ -8,7 +8,7 @@ from pygame.surface import Surface
 from typedefs import (
     Color,
     ColorRGB,
-    Point
+    Coord
 )
 
 ERROR = -1
@@ -83,7 +83,7 @@ class Display:
         pygame.display.flip()
         self.state = ACTIVE
 
-    def add(self, disp: Displayable, pos: Point, z: int = 0):
+    def add(self, disp: Displayable, pos: Coord, z: int = 0):
         """Adds a displayable to the display
 
         Args:
@@ -127,7 +127,7 @@ class Display:
 class Displayable:
     """Abstract class for display elements"""
 
-    position: Point
+    position: Coord
     zOrder: int
 
     def render(self) -> Surface:
@@ -169,7 +169,7 @@ class Panel(Displayable):
                                     len(self.fillColor) == 4)
         self._children: list[Displayable] = []
 
-    def add(self, disp: Displayable, pos: Point, z: int = 0):
+    def add(self, disp: Displayable, pos: Coord, z: int = 0):
         """Adds a child displayable to the panel
 
         Args:
@@ -232,7 +232,7 @@ class Image(Displayable):
         """
         return Image(self._source, area)
 
-    def size(self) -> Point:
+    def size(self) -> Coord:
         """Returns the dimensions of the image
 
         Returns:

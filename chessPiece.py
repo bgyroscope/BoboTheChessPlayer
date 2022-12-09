@@ -12,7 +12,11 @@ Attributes:
     ** special for pawns -- capDirection, capMaxRange for capture directions
 """
 
-from typedefs import PieceChar, ColorChar, Vector
+from typedefs import (
+    PieceChar,
+    ColorChar,
+    Vector
+)
 
 
 MAX_RANGE = -1
@@ -47,12 +51,12 @@ class Piece:
         raise NotImplementedError()
 
     @property
-    def captureDirection(self) -> list[Vector]:
+    def attackDirection(self) -> list[Vector]:
         """A list of directions the piece can capture"""
         return self.moveDirection
 
     @property
-    def captureRange(self) -> int:
+    def attackRange(self) -> int:
         """The maximum distance the piece can capture from"""
         return self.moveRange
 
@@ -79,13 +83,13 @@ class Pawn(Piece):
         return 2 if not self.hasMoved else 1
 
     @property
-    def captureDirection(self) -> list[Vector]:
+    def attackDirection(self) -> list[Vector]:
         if self.color == ColorChar.WHITE:
             return [(-1, -1), (-1, 1)]
         return [(1, -1), (1, 1)]
 
     @property
-    def captureRange(self) -> int:
+    def attackRange(self) -> int:
         return 1
 
 
