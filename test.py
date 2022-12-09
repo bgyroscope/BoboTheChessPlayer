@@ -3,10 +3,10 @@
 # 2022.07.28 making sure I am using github correctly. 
 # 2022.07.26 test.py -- test the creations of the objects. 
 
-import genFun as gf 
-import chessBoard as cb
-import chessPiece as cp 
-import chessMove  as cm
+import fen as gf 
+import chess_board as cb
+import chess_piece as cp 
+import chess_move  as cm
 import chessPlayer as cp
 
 import random
