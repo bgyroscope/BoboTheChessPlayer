@@ -1,8 +1,0 @@
-{
-  "python.linting.enabled": true,
-  "python.linting.pylintEnabled": true,
-  "python.linting.pylintArgs": [
-    "--extension-pkg-whitelist=pygame"
-  ],
-  "python.analysis.typeCheckingMode": "basic"
-}
