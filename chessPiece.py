@@ -19,8 +19,8 @@ MAX_RANGE = -1
 
 
 class Piece:
-    """A generic chess piece
-    """
+    """A generic chess piece"""
+
     char: PieceChar
     color: ColorChar
     hasMoved: bool
@@ -38,26 +38,22 @@ class Piece:
 
     @property
     def moveDirection(self) -> list[Vector]:
-        """A list of directions the piece can move
-        """
+        """A list of directions the piece can move"""
         raise NotImplementedError()
 
     @property
     def moveRange(self) -> int:
-        """The maximum number of squares the piece can move
-        """
+        """The maximum number of squares the piece can move"""
         raise NotImplementedError()
 
     @property
     def captureDirection(self) -> list[Vector]:
-        """A list of directions the piece can capture
-        """
+        """A list of directions the piece can capture"""
         return self.moveDirection
 
     @property
     def captureRange(self) -> int:
-        """The maximum distance the piece can capture from
-        """
+        """The maximum distance the piece can capture from"""
         return self.moveRange
 
     def __str__(self) -> str:
@@ -66,8 +62,7 @@ class Piece:
 
 
 class Pawn(Piece):
-    """A chess pawn
-    """
+    """A chess pawn"""
 
     def __init__(self, color: ColorChar):
         super().__init__(PieceChar.PAWN, color)
@@ -95,8 +90,7 @@ class Pawn(Piece):
 
 
 class Knight(Piece):
-    """A chess knight
-    """
+    """A chess knight"""
 
     def __init__(self, color: ColorChar):
         super().__init__(PieceChar.KNIGHT, color)
@@ -112,8 +106,7 @@ class Knight(Piece):
 
 
 class Bishop(Piece):
-    """A chess bishop
-    """
+    """A chess bishop"""
 
     def __init__(self, color: ColorChar):
         super().__init__(PieceChar.BISHOP, color)
@@ -128,8 +121,7 @@ class Bishop(Piece):
 
 
 class Rook(Piece):
-    """A chess rook
-    """
+    """A chess rook"""
 
     def __init__(self, color: ColorChar):
         super().__init__(PieceChar.ROOK, color)
@@ -144,8 +136,7 @@ class Rook(Piece):
 
 
 class Queen(Piece):
-    """A chess queen
-    """
+    """A chess queen"""
 
     def __init__(self, color: ColorChar):
         super().__init__(PieceChar.QUEEN, color)
@@ -161,8 +152,7 @@ class Queen(Piece):
 
 
 class King(Piece):
-    """A chess king
-    """
+    """A chess king"""
 
     def __init__(self, color: ColorChar):
         super().__init__(PieceChar.KING, color)

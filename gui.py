@@ -18,8 +18,8 @@ QUIT = 2
 
 
 def hasAlphaChannel(surface: Surface) -> bool:
-    """Returns whether a provided surface has an alpha channel
-    """
+    """Returns whether a provided surface has an alpha channel"""
+
     return (surface.get_flags() & pygame.SRCALPHA) != 0
 
 
@@ -58,8 +58,7 @@ def loadImage(path: str) -> Image:
 
 
 class Display:
-    """Represents a display window that can be updated at a fixed framerate
-    """
+    """Represents a display window that can be updated at a fixed framerate"""
 
     def __init__(self,
                  width: int,
@@ -79,8 +78,8 @@ class Display:
         self.state = READY
 
     def show(self):
-        """Causes the display to be shown
-        """
+        """Causes the display to be shown"""
+
         pygame.display.flip()
         self.state = ACTIVE
 
@@ -99,8 +98,8 @@ class Display:
         self._displayables.sort(key=lambda x: x.zOrder)
 
     def tick(self):
-        """Updates the display by one frame
-        """
+        """Updates the display by one frame"""
+
         self._processEvents()
 
         self._surface.fill(self.fillColor)
@@ -124,9 +123,10 @@ class Display:
                 if child.handle(event):
                     break
 
+
 class Displayable:
-    """Abstract class for display elements
-    """
+    """Abstract class for display elements"""
+
     position: Point
     zOrder: int
 
@@ -149,8 +149,7 @@ class Displayable:
 
 
 class Panel(Displayable):
-    """A display element that can contain child displayables
-    """
+    """A display element that can contain child displayables"""
 
     def __init__(self,
                  width: int,
@@ -197,8 +196,7 @@ class Panel(Displayable):
 
 
 class Image(Displayable):
-    """An image display element
-    """
+    """An image display element"""
 
     def __init__(self,
                  source: Surface,

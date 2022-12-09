@@ -2,6 +2,7 @@ from enum import Enum
 
 
 class PieceChar(Enum):
+    """FEN characters for each piece"""
     KING = 'k'
     QUEEN = 'q'
     BISHOP = 'b'
@@ -11,6 +12,7 @@ class PieceChar(Enum):
 
 
 class ColorChar(Enum):
+    """FEN characters for the piece colors"""
     WHITE = 'w'
     BLACK = 'b'
 

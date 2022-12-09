@@ -40,8 +40,7 @@ MOVE_HOVER_COLOR = (0, 255, 0, 128)
 
 
 class Board(Displayable):
-    """A chess board displayable
-    """
+    """A chess board displayable"""
 
     _game: Game
     _boardImage: Image

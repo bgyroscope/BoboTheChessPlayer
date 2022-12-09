@@ -22,8 +22,8 @@ STANDARD_START_POSITION = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w kqKQ - 
 
 
 class Game:
-    """Manages the game logic, such as moves, captures, win/loss, etc.
-    """
+    """Manages the game logic, such as moves, captures, win/loss, etc."""
+
     toMove: ColorChar
     castleRights: str
     epTarget: (Point | None)
@@ -117,8 +117,7 @@ class Game:
         return row < 0 or row >= self.numRows or col < 0 or col >= self.numCols
 
     def getAvaiableMoves(self, row: int, col: int) -> list[Move]:
-        """Returns a list of valid moves on the board for the piece at (row, col)
-        """
+        """Returns a list of valid moves on the board for the piece at (row, col)"""
 
         piece = self._board[row][col]
         if piece is None:
@@ -204,8 +203,8 @@ class Game:
         return captures
 
     def executeMove(self, move: Move):
-        """Performs the given move on the board
-        """
+        """Performs the given move on the board"""
+
         startRow, startCol = move.begin
         endRow, endCol = move.end
 

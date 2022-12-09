@@ -4,19 +4,15 @@
 
 """
 Class for the different moves that can be made.
-    There are subclasses for simple, captures, ep, promotion,
 
-promotion will be handled by chaning the piece according to the flag.
-castling will be done by a king move.
-
-begin -- where the piece starts.  alphanumeric code
-end -- where the piece ends.   alphanumeric loc
-remove -- piece to remove. alphanumeric loc
-addition -- piece to add to the board
+begin -- where the piece starts
+end -- where the piece ends
 """
 
 
 class Move:
+    """Base class for all moves"""
+
     def __init__(self, begin, end):
         self.begin = begin
         self.end = end
@@ -26,20 +22,28 @@ class Move:
 
 
 class Capture(Move):
+    """A capture of another piece"""
+
     def __str__(self):
         return super().__str__() + ' as a capture.'
 
 
 class EnPassant(Capture):
+    """A capture via en passant"""
+
     def __str__(self):
         return super().__str__() + ' as an en passant capture.'
 
 
 class PawnPush(Move):
+    """A pawn movement"""
+
     def __str__(self):
         return super().__str__() + ' as a pawn push.'
 
 
 class PawnDoublePush(PawnPush):
+    """A pawn movement of 2 squares"""
+
     def __str__(self):
         return super().__str__() + ' as a pawn double push.'
