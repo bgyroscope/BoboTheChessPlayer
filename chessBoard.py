@@ -24,12 +24,13 @@ from pygame.rect import Rect
 from pygame.surface import Surface
 
 from typedefs import (
+    PieceChar,
+    ColorChar,
     ColorRGBA,
     Point
 )
 from gui import Displayable, Image
 from chessGame import Game
-import chessPiece
 from chessPiece import Piece
 
 SQUARE_HOVER_COLOR = (192, 192, 0, 128)
@@ -65,15 +66,15 @@ class Board(Displayable):
 
     def _getPieceSprite(self, piece: Piece) -> Surface:
         pieceIndices = {
-            chessPiece.KING: 0,
-            chessPiece.QUEEN: 1,
-            chessPiece.BISHOP: 2,
-            chessPiece.KNIGHT: 3,
-            chessPiece.ROOK: 4,
-            chessPiece.PAWN: 5
+            PieceChar.KING: 0,
+            PieceChar.QUEEN: 1,
+            PieceChar.BISHOP: 2,
+            PieceChar.KNIGHT: 3,
+            PieceChar.ROOK: 4,
+            PieceChar.PAWN: 5
         }
         x = pieceIndices[piece.char] * self._cellSize
-        y = 0 if piece.color == chessPiece.WHITE else self._cellSize
+        y = 0 if piece.color == ColorChar.WHITE else self._cellSize
         rect = Rect(x, y, self._cellSize, self._cellSize)
         sprite = self._piecesImage.crop(rect)
         return sprite.render()
@@ -102,7 +103,7 @@ class Board(Displayable):
         return board
 
     def _highlightMoves(self, board: Surface):
-        row, col = self._selectedSquare # type: ignore
+        row, col = self._selectedSquare  # type: ignore
         moves = self._game.getAvaiableMoves(row, col)
         for move in moves:
             row, col = move.end
@@ -147,7 +148,8 @@ class Board(Displayable):
         else:
             row, col = self._selectedSquare
             moves = self._game.getAvaiableMoves(row, col)
-            selectedMove = next((move for move in moves if move.end == coords), None)
+            selectedMove = next(
+                (move for move in moves if move.end == coords), None)
             if selectedMove is not None:
                 self._game.executeMove(selectedMove)
             self._selectedSquare = None

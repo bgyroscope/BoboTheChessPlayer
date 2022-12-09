@@ -19,9 +19,6 @@ class Player:
 
 class Human(Player):
 
-    def __init__(self, color):
-        super().__init__(color)
-
     def __str__(self):
         return super().__repr__() + " is human."
 
@@ -52,9 +49,6 @@ class Human(Player):
 
 
 class RandomComp(Player):
-
-    def __init__(self, color):
-        super().__init__(color)
 
     def __str__(self):
         return super().__repr__() + " is random computer."

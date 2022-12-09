@@ -12,17 +12,8 @@ Attributes:
     ** special for pawns -- capDirection, capMaxRange for capture directions
 """
 
-from typedefs import Vector
+from typedefs import PieceChar, ColorChar, Vector
 
-KING = 'k'
-QUEEN = 'q'
-BISHOP = 'b'
-KNIGHT = 'n'
-ROOK = 'r'
-PAWN = 'p'
-
-WHITE = 'w'
-BLACK = 'b'
 
 MAX_RANGE = -1
 
@@ -30,18 +21,18 @@ MAX_RANGE = -1
 class Piece:
     """A generic chess piece
     """
-    char: str
-    color: str
+    char: PieceChar
+    color: ColorChar
     hasMoved: bool
 
-    def __init__(self, char: str, color: str):
+    def __init__(self, char: PieceChar, color: ColorChar):
         """
         Args:
             char (str): the color of the piece ('w' or 'b')
             color (str): the FEN representation of the piece ('k', 'q', 'b', 'n', 'r', or 'p')
         """
-        self.char = char.lower()
-        self.color = color.lower()
+        self.char = char
+        self.color = color
 
         self.hasMoved = False
 
@@ -70,20 +61,21 @@ class Piece:
         return self.moveRange
 
     def __str__(self) -> str:
-        return self.char.lower() if self.color == BLACK else self.char.upper()
+        char = self.char.value
+        return char.lower() if self.color == ColorChar.BLACK else char.upper()
 
 
 class Pawn(Piece):
     """A chess pawn
     """
 
-    def __init__(self, color: str):
-        super().__init__(PAWN, color)
+    def __init__(self, color: ColorChar):
+        super().__init__(PieceChar.PAWN, color)
 
     @property
     def moveDirection(self) -> list[Vector]:
         # a8 is (0, 0) so white pawns move in -y direction
-        if self.color == WHITE:
+        if self.color == ColorChar.WHITE:
             return [(-1, 0)]
         return [(1, 0)]
 
@@ -93,7 +85,7 @@ class Pawn(Piece):
 
     @property
     def captureDirection(self) -> list[Vector]:
-        if self.color == WHITE:
+        if self.color == ColorChar.WHITE:
             return [(-1, -1), (-1, 1)]
         return [(1, -1), (1, 1)]
 
@@ -106,8 +98,8 @@ class Knight(Piece):
     """A chess knight
     """
 
-    def __init__(self, color: str):
-        super().__init__(KNIGHT, color)
+    def __init__(self, color: ColorChar):
+        super().__init__(PieceChar.KNIGHT, color)
 
     @property
     def moveDirection(self) -> list[Vector]:
@@ -123,8 +115,8 @@ class Bishop(Piece):
     """A chess bishop
     """
 
-    def __init__(self, color: str):
-        super().__init__(BISHOP, color)
+    def __init__(self, color: ColorChar):
+        super().__init__(PieceChar.BISHOP, color)
 
     @property
     def moveDirection(self) -> list[Vector]:
@@ -139,8 +131,8 @@ class Rook(Piece):
     """A chess rook
     """
 
-    def __init__(self, color: str):
-        super().__init__(ROOK, color)
+    def __init__(self, color: ColorChar):
+        super().__init__(PieceChar.ROOK, color)
 
     @property
     def moveDirection(self) -> list[Vector]:
@@ -155,8 +147,8 @@ class Queen(Piece):
     """A chess queen
     """
 
-    def __init__(self, color: str):
-        super().__init__(QUEEN, color)
+    def __init__(self, color: ColorChar):
+        super().__init__(PieceChar.QUEEN, color)
 
     @property
     def moveDirection(self) -> list[Vector]:
@@ -172,8 +164,8 @@ class King(Piece):
     """A chess king
     """
 
-    def __init__(self, color: str):
-        super().__init__(KING, color)
+    def __init__(self, color: ColorChar):
+        super().__init__(PieceChar.KING, color)
 
     @property
     def moveDirection(self) -> list[Vector]:

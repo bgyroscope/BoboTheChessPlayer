@@ -1,3 +1,20 @@
+from enum import Enum
+
+
+class PieceChar(Enum):
+    KING = 'k'
+    QUEEN = 'q'
+    BISHOP = 'b'
+    KNIGHT = 'n'
+    ROOK = 'r'
+    PAWN = 'p'
+
+
+class ColorChar(Enum):
+    WHITE = 'w'
+    BLACK = 'b'
+
+
 ColorRGB = tuple[int, int, int]
 """A color represented by a (red, green, blue) tuple"""
 ColorRGBA = tuple[int, int, int, int]

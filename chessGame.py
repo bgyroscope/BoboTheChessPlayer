@@ -1,4 +1,4 @@
-from typedefs import Point
+from typedefs import PieceChar, ColorChar, Point
 import fen as FEN
 from chessMove import (
     Move,
@@ -24,7 +24,7 @@ STANDARD_START_POSITION = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w kqKQ - 
 class Game:
     """Manages the game logic, such as moves, captures, win/loss, etc.
     """
-    toMove: str
+    toMove: ColorChar
     castleRights: str
     epTarget: (Point | None)
     halfMoveClock: int
@@ -43,7 +43,8 @@ class Game:
         """
         temp = fen.split(' ')
         self.setPosition(temp[0])
-        self.toMove, self.castleRights = temp[1:3]
+        self.toMove = ColorChar(temp[1])
+        self.castleRights = temp[2]
         self.epTarget = FEN.coordToNum(temp[3]) if temp[3] != '-' else None
         self.halfMoveClock = int(temp[4])
         self.fullMoveNumber = int(temp[5])
@@ -67,29 +68,28 @@ class Game:
                 if char in '12345678':
                     self._board[i] += [None] * int(char)
                 else:
-                    piece = self._createPiece(char)
+                    pieceChar = PieceChar(char.lower())
+                    colorChar = ColorChar.BLACK if char.islower() else ColorChar.WHITE
+                    piece = self._createPiece(pieceChar, colorChar)
                     self._board[i].append(piece)
 
-    def _createPiece(self, piece: str) -> Piece:
-        color = chessPiece.BLACK if piece.islower() else chessPiece.WHITE
-        piece = piece.lower()
+    def _createPiece(self, pieceChar: PieceChar, colorChar: ColorChar) -> Piece:
+        if pieceChar == PieceChar.KING:
+            return King(colorChar)
 
-        if piece == chessPiece.KING:
-            return King(color)
+        if pieceChar == PieceChar.QUEEN:
+            return Queen(colorChar)
 
-        if piece == chessPiece.QUEEN:
-            return Queen(color)
+        if pieceChar == PieceChar.BISHOP:
+            return Bishop(colorChar)
 
-        if piece == chessPiece.BISHOP:
-            return Bishop(color)
+        if pieceChar == PieceChar.KNIGHT:
+            return Knight(colorChar)
 
-        if piece == chessPiece.KNIGHT:
-            return Knight(color)
+        if pieceChar == PieceChar.ROOK:
+            return Rook(colorChar)
 
-        if piece == chessPiece.ROOK:
-            return Rook(color)
-
-        return Pawn(color)
+        return Pawn(colorChar)
 
     @property
     def numRows(self) -> int:  # pylint: disable=missing-function-docstring
@@ -124,15 +124,15 @@ class Game:
         if piece is None:
             return []
 
-        moves = self._getAvailableMoves(row, col)
-        moves += self._getAvailableCaptures(row, col)
+        moves = self._getPseudoLegalMoves(row, col)
+        moves += self._getPseudoLegalCaptures(row, col)
 
         # now also consider castling, en passant, pawn promotion
         # also must check if a move puts the player in check
 
         return moves
 
-    def _getAvailableMoves(self, row: int, col: int) -> list[Move]:
+    def _getPseudoLegalMoves(self, row: int, col: int) -> list[Move]:
         piece = self._board[row][col]
         if piece is None:
             return []
@@ -167,7 +167,7 @@ class Game:
 
         return moves
 
-    def _getAvailableCaptures(self, row: int, col: int) -> list[Move]:
+    def _getPseudoLegalCaptures(self, row: int, col: int) -> list[Move]:
         piece = self._board[row][col]
         if piece is None:
             return []
@@ -221,15 +221,15 @@ class Game:
         # En passant capturing
         if isinstance(move, EnPassant):
             # remove the captured pawn, whose location depends on color
-            if self.toMove == chessPiece.WHITE:
+            if self.toMove == ColorChar.WHITE:
                 self._board[endRow + 1][endCol] = None
             else:
                 self._board[endRow - 1][endCol] = None
 
         # Pawn promotion
         if isinstance(piece, Pawn) and \
-                ((piece.color == chessPiece.WHITE and endRow == 0)
-                 or (piece.color == chessPiece.BLACK and endRow == self.numRows - 1)):
+                ((piece.color == ColorChar.WHITE and endRow == 0)
+                 or (piece.color == ColorChar.BLACK and endRow == self.numRows - 1)):
             self._board[endRow][endCol] = Queen(piece.color)
 
         self._updateState(move)
@@ -238,7 +238,7 @@ class Game:
         # En passant availability
         if isinstance(move, PawnDoublePush):
             row, col = move.end
-            if self.toMove == chessPiece.WHITE:
+            if self.toMove == ColorChar.WHITE:
                 self.epTarget = (row + 1, col)
             else:
                 self.epTarget = (row - 1, col)
@@ -252,11 +252,11 @@ class Game:
             self.halfMoveClock += 1
 
         # Current move + move number
-        if self.toMove == chessPiece.BLACK:
-            self.toMove = chessPiece.WHITE
+        if self.toMove == ColorChar.BLACK:
+            self.toMove = ColorChar.WHITE
             self.fullMoveNumber += 1
         else:
-            self.toMove = chessPiece.BLACK
+            self.toMove = ColorChar.BLACK
 
     # def checkStatus(self, color: str) -> str:
     #     """Determine the current status of the game
@@ -289,7 +289,7 @@ class Game:
     #         else:
     #             return "invalid"
 
-    # def findKings(self):
+    # def findKing(self, color: str) -> :
     #     ''' returns number of white then number of black kings '''
     #     nw = 0
     #     nb = 0
