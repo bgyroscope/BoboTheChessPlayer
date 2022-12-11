@@ -2,15 +2,16 @@
 # 2022.07.27
 # chessMove.py 
 
-# Class for the different moves that can be made. There are subclasses for simple, captures, ep, promotion, 
+# Class for the different moves that can be made. There are subclasses for simple, captures, ep, promotion,  castling
 
 # promotion will be handled by chaning the piece according to the flag. 
 # castling will be done by a king move. 
 
 # begin -- where the piece starts.  alphanumeric code
 # end -- where the piece ends.   alphanumeric loc
-# remove -- piece to remove. alphanumeric loc 
-# addition -- piece to add to the board 
+
+## remove -- piece to remove. alphanumeric loc 
+## addition -- piece to add to the board 
 
 
 class Move: 
@@ -76,8 +77,17 @@ class PawnPromote(PawnMove):
         return super().__repr__() + ' as a pawn promotion to {}. ' .format( self.promoteFlag ) 
 
    
+# Castling subclass    
+class Castle(Move): 
+    def __init__(self, begin, end, castleFlag='k' ):
+        # use k for kingside and q for queenside, consistent with FEN 
+        super().__init__(begin, end)
+        self.castleFlag = castleFlag
 
-   
+    def __repr__(self): 
+        helpdict = { 'k': 'kingside', 'q': 'queenside' } 
+        return super().__repr__() + ', i.e. castle {}'.format( helpdict[self.castleFlag.lower() ] ) 
+
 
 
 

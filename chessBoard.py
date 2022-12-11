@@ -103,20 +103,6 @@ class Board:
 
 
     # Making moves on the board -------------------------------------------------------------------------
-    
-
-
-    # def isSquareEmpty(self, loc): 
-    #     ''' return bool if the square is unoccupied ''' 
-
-    #     return True 
-
-
-    # def isSquareAttacked(self,loc, color): 
-    #     ''' returns bool if the square is attacked by color piece ''' 
-
-
-
     def checkStatus(self, color, moveArr=[] ): 
         ''' check the status of the game ---> for now use number of kings or valid moves as a proxy
             color = 'w' or 'b' 
@@ -168,7 +154,7 @@ class Board:
 
 
     def inCheck(self, color, moveArr=[]):
-        ''' function determines if player of color 'color' is in chekc. 
+        ''' function determines if player of color 'color' is in check. 
         color = 'w' or 'b'. 
         moveArr is the possible moves. If None, then possible moves is called. 
         Return True or False. '''
@@ -217,14 +203,14 @@ class Board:
             # check if King is in check after the move.
             tempBoard = Board( self.FEN ) 
             tempBoard.executeMove( move )
-            moveArr = tempBoard.possibleMoves( tempBoard.toMove ) 
+            tempMoveArr = tempBoard.possibleMoves( tempBoard.toMove ) 
 
             # print( move) 
             # self.display()  
             # tempBoard.display() 
             # print( 'Is ', color, ' in check?', tempBoard.inCheck(color) ) 
 
-            if not tempBoard.inCheck( color, moveArr  ):  
+            if not tempBoard.inCheck( color, tempMoveArr  ):  
                 validMoveArr.append(move)  
 
 
@@ -309,7 +295,41 @@ class Board:
                     # ----------------------------------------------
  
                     else: 
-                        # for all the other pieces ... 
+
+                        # check if castling is possible for king. -----------------------------------------------------------------
+                        if isinstance( p, cp.King ):  
+                            
+                            helpdir = { 'k': 1, 'q': -1 }  # for specifying direction  
+
+                            # check FEN flags 
+                            if color == 'w': testFlags = 'KQ'
+                            else: testFlags = 'kq'
+
+                            for flag in testFlags: 
+                                if flag in self.castleRights:
+                                    # direction relies on the FEN flag being correct
+                                    newr, newc = r, c + 2*helpdir[flag.lower()] 
+                                    # if newr<0 or newr >= self.nrows or newc < 0 or newc >= self.nrows: 
+                                    #     continue 
+                                    end = gf.numToCoor( [ newr, newc ] ) 
+
+                                    # check that the spaces are empty between king and rook  
+                                    lastj = 3 + (1 - helpdir[flag.lower()] ) // 2   # queenside has 3 spaces to check while kingside has only 2 spaces. 
+                                                                                    # lastj is 3 + ( 1 - (-1) )//2 = 4 for queenside vs 3  for kingside 
+
+                                    if sum( [ self.arr[r][c+helpdir[flag.lower()]*j] == None for j in range(1,lastj) ] ) == lastj - 1 :
+
+                                        # check it doesn't move through check (lands in check is tested by valid move)  
+                                        tempBoard = Board( self.FEN )
+                                        move = cm.Simple( gf.numToCoor([r,c]) , gf.numToCoor([r, c+ helpdir[flag.lower()] ] ) )
+                                        tempBoard.executeMove( move )
+                                        tempMoveArr = tempBoard.possibleMoves( tempBoard.toMove ) 
+                                        if not tempBoard.inCheck( color, tempMoveArr ): 
+                                            moveArr.append( cm.Castle(begin, end, flag) ) 
+ 
+
+
+                        # for all the other simple moves -----------------------------------------------------------------
                         for direc in p.direction: 
                             for j in range(1,p.maxRange+1):
                                 # continue to add valid moves until it encounters another piece. 
@@ -331,8 +351,6 @@ class Board:
                                     # cannot move to square with own piece 
                                     break  
 
-        # now also consider the special moves of  castling  (ep above) 
-        # also must check if a move puts the player in check 
 
         return moveArr 
 
@@ -364,6 +382,16 @@ class Board:
                 char = move.promoteFlag.lower() 
 
             self.arr[e[0] ][ e[1] ] = cp.createPiece( char  )  
+
+
+        # castling -- have to move the rook, too 
+        elif isinstance( move, cm.Castle ): 
+            if move.castleFlag.lower() == 'k': 
+                self.arr[b[0] ][ e[1]-1 ]  = self.arr[b[0] ][ 7 ] 
+                self.arr[b[0] ][ 7 ] = None 
+            elif move.castleFlag.lower() == 'q': 
+                self.arr[b[0] ][ e[1]+1 ]  = self.arr[b[0] ][ 0 ] 
+                self.arr[b[0] ][ 0 ] = None 
 
 
         # update the FEN and other variables 
@@ -407,8 +435,29 @@ class Board:
         tempBoardStr = self.getBoardStr() 
        
         # changes due to flags 
-        # self.castleRights = ? 
-        # self.epRights = ? 
+        # castling rights -- if castle change self.castleRights = '-'. Also must check for king or rook move (based on c)  
+        r,c = gf.coorToNum( move.end ) 
+        movedPiece = self.arr[r][c]
+        # no more castling rights if the piece that moved (or castle but that should already be covered by king moved)  #  or isinstance( move, cm.Castle):
+        if isinstance( movedPiece, cp.King) or isinstance(movedPiece, cp.Rook):
+            if isinstance( movedPiece, cp.King ): 
+                toRemove = 'kq'
+            else:
+                rbegin, cbegin = gf.coorToNum( move.begin) 
+                if cbegin == 0: 
+                    toRemove = 'q'
+                elif cbegin == 7: 
+                    toRemove = 'k' 
+
+            if self.toMove == 'w': toRemove = toRemove.upper()   # make uppercase for white pieces  
+
+            newCastleRights = '' 
+            for char in self.castleRights: 
+                if char not in toRemove: 
+                    newCastleRights += char 
+
+            self.castleRights = newCastleRights
+
 
 
         # ep rights
@@ -429,7 +478,7 @@ class Board:
             self.halfMoveClock += 1 
 
 
-        # update whose move it is at the end 
+        # update whose move it is at the end ----------------------------
         if self.toMove == 'w': 
             self.toMove = 'b'
        
