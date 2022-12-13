@@ -38,6 +38,7 @@ class Game:
     _board: list[list[(Piece | None)]]
 
     def __init__(self, startPos: str = STANDARD_START_POSITION):
+        self.FENstr = startPos
         self.setState(startPos)
 
     def setState(self, fen: str):
@@ -152,10 +153,19 @@ class Game:
         moves += self._getPiecePseudoLegalCaptures(row, col, piece)
         moves += self._getPiecePseudoLegalSpecialStep(row, col, piece)   # to incorporate initial double step of pawn and castling
 
+        # return moves
+
+        # check that the moves are legal
+        idxToRemove = [] 
+        for idx, move in enumerate(moves): 
+            if self.moveIntoCheck( move ): 
+                idxToRemove.append(idx)     
+
+        return [move for idx, move in enumerate(moves) if idx not in idxToRemove]  
+
         # now also consider castling, en passant, pawn promotion
         # also must check if a move puts the player in check
 
-        return moves
 
     def _getPiecePseudoLegalMoves(self, row: int, col: int, piece: Piece) -> list[Move]:
         moves = []
@@ -266,10 +276,6 @@ class Game:
 
         return specialSteps
 
-
-
-
-
     def isSquareAttacked(self, square: Coord, color: ColorChar) -> bool:
         """Returns whether the given square is attacked by a piece of the given color"""
 
@@ -314,6 +320,7 @@ class Game:
 
 
     def _updateState(self, move: Move):
+
         # Caslting rights  castleRights
 
         # En passant availability
@@ -343,12 +350,11 @@ class Game:
     def _updateFEN(self): 
        
         tempBoardStr = self._getBoardStr()
-        if not self.epTarget: epStr = '-'  
-        else: epStr = FEN.coordToSquare( self.epTarget ) 
+        # to format the FEN correctly, convert enum to string
+        toMoveStr = 'w' if self.toMove == ColorChar.WHITE else 'b'  
+        epStr = '-' if not self.epTarget else FEN.coordToSquare( self.epTarget ) 
 
-        self.FENstr = ' '.join( [tempBoardStr, str(self.toMove), self.castleRights, epStr, str( self.halfMoveClock) , str( self.fullMoveNumber) ]  ) 
-        
-         
+        self.FENstr = ' '.join( [tempBoardStr, toMoveStr, self.castleRights, epStr, str( self.halfMoveClock) , str( self.fullMoveNumber) ]  ) 
 
     def _getBoardStr(self):
 
@@ -372,6 +378,30 @@ class Game:
 
         return outstr[:-1]    # remove accidentally over included '/'  
 
+    def findKing(self, color: ColorChar) -> Coord:
+        """Returns the position of the king of the given color"""
+
+        for row, col, piece in self.enumerateBoard():
+            if isinstance(piece, King) and piece.color == color:
+                return (row, col)
+
+        raise Exception(f"No {color} king found!")
+
+    def inCheck(self, color: ColorChar) -> bool:
+        """Returns whether the player of the given color is in check"""
+
+        kingPos = self.findKing(color)
+        return self.isSquareAttacked(kingPos, color.opponent())
+
+    def moveIntoCheck(self, move: Move) -> bool: 
+        """Returns if the current move excuted would put the player toMove in check. """
+
+        tempGame = Game( self.FENstr ) 
+        tempGame.executeMove( move  )
+
+        if not tempGame.inCheck( self.toMove ): 
+            return False
+        else: return True 
 
 
     # def updateFEN(self, move ): 
@@ -471,17 +501,3 @@ class Game:
     #         else:
     #             return "invalid"
 
-    def findKing(self, color: ColorChar) -> Coord:
-        """Returns the position of the king of the given color"""
-
-        for row, col, piece in self.enumerateBoard():
-            if isinstance(piece, King) and piece.color == color:
-                return (row, col)
-
-        raise Exception(f"No {color} king found!")
-
-    def inCheck(self, color: ColorChar) -> bool:
-        """Returns whether the player of the given color is in check"""
-
-        kingPos = self.findKing(color)
-        return self.isSquareAttacked(kingPos, color.opponent())

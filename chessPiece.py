@@ -44,7 +44,7 @@ class Piece:
 
     @property
     def homeRow(self) -> int:
-        return 7 if self.color == ColorChar.WHITE else 0
+        return 7 if self.color == ColorChar.WHITE else 0  # 7 for numRows-1
 
 
     @property
