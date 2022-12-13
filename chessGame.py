@@ -149,6 +149,7 @@ class Game:
 
         moves = self._getPiecePseudoLegalMoves(row, col, piece)
         moves += self._getPiecePseudoLegalCaptures(row, col, piece)
+        moves += self._getPiecePseudoLegalSpecialStep(row, col, piece)   # to incorporate initial double step of pawn and castling
 
         # now also consider castling, en passant, pawn promotion
         # also must check if a move puts the player in check
@@ -178,10 +179,11 @@ class Game:
                     break
 
                 end = (newr, newc)
-                if isinstance(piece, Pawn) and i == 2:
-                    move = PawnDoublePush(start, end)
-                else:
-                    move = Move(start, end)
+                move = Move(start,end) 
+                # if isinstance(piece, Pawn) and i == 2:
+                #     move = PawnDoublePush(start, end)
+                # else:
+                #     move = Move(start, end)
                 moves.append(move)
 
         return moves
@@ -204,6 +206,7 @@ class Game:
                 captures.append(EnPassant(start, end))
 
         return captures
+
 
     def _getPieceAttacks(self, row: int, col: int, piece: Piece) -> list[Coord]:
         attacks = []
@@ -232,6 +235,35 @@ class Game:
                     break
 
         return attacks
+
+    def _getPiecePseudoLegalSpecialStep(self, row: int, col: int, piece: Piece) -> list[Move]: 
+        specialSteps = [] 
+        start = (row, col) 
+
+        if isinstance( piece, Pawn) and row == piece.homeRow: 
+
+            for moveDir in piece.specialDirection:
+                newr = row + moveDir[0] * piece.specialStep
+                newc = col + moveDir[1] * piece.specialStep
+
+                if self._coordOutOfBounds(newr, newc):
+                    continue
+
+                target = self._board[newr][newc]
+                if target is not None:
+                    continue
+
+                end = (newr, newc)
+                move = PawnDoublePush(start, end) 
+
+                specialSteps.append(move)
+
+
+        return specialSteps
+
+
+
+
 
     def isSquareAttacked(self, square: Coord, color: ColorChar) -> bool:
         """Returns whether the given square is attacked by a piece of the given color"""

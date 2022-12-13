@@ -27,7 +27,7 @@ class Piece:
 
     char: PieceChar
     color: ColorChar
-    hasMoved: bool
+#     hasMoved: bool
 
     def __init__(self, char: PieceChar, color: ColorChar):
         """
@@ -38,7 +38,7 @@ class Piece:
         self.char = char
         self.color = color
 
-        self.hasMoved = False
+        # self.hasMoved = False
 
     @property
     def moveDirection(self) -> list[Vector]:
@@ -80,7 +80,8 @@ class Pawn(Piece):
 
     @property
     def moveRange(self) -> int:
-        return 2 if not self.hasMoved else 1
+        # return 2 if not self.hasMoved else 1
+        return 1
 
     @property
     def attackDirection(self) -> list[Vector]:
@@ -91,6 +92,19 @@ class Pawn(Piece):
     @property
     def attackRange(self) -> int:
         return 1
+
+
+    @property 
+    def specialStep(self) -> int:
+        return 2
+
+    @property 
+    def specialDirection(self) -> list[Vector]: 
+        return self.moveDirection 
+
+    @property
+    def homeRow(self) -> int:
+        return 6 if self.color == ColorChar.WHITE else 1
 
 
 class Knight(Piece):
