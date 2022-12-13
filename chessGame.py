@@ -33,6 +33,7 @@ class Game:
     epTarget: (Coord | None)
     halfMoveClock: int
     fullMoveNumber: int
+    FENstr: str
 
     _board: list[list[(Piece | None)]]
 
@@ -240,7 +241,7 @@ class Game:
         specialSteps = [] 
         start = (row, col) 
 
-        if isinstance( piece, Pawn) and row == piece.homeRow: 
+        if isinstance(piece, Pawn):   # or isinstance(piece, (Pawn,King) ): 
 
             for moveDir in piece.specialDirection:
                 newr = row + moveDir[0] * piece.specialStep
@@ -254,10 +255,14 @@ class Game:
                     continue
 
                 end = (newr, newc)
-                move = PawnDoublePush(start, end) 
 
-                specialSteps.append(move)
+                move = None
+                if isinstance( piece, Pawn) and row == piece.homeRow: 
+                    move = PawnDoublePush(start, end) 
+                # elif isinstance( piece, King)  
 
+                if move:
+                    specialSteps.append(move)
 
         return specialSteps
 
@@ -305,8 +310,12 @@ class Game:
             self._board[endRow][endCol] = Queen(piece.color)
 
         self._updateState(move)
+        # print( self.toMove, self.castleRights, self.epTarget, self.halfMoveClock, self.fullMoveNumber ) 
+
 
     def _updateState(self, move: Move):
+        # Caslting rights  castleRights
+
         # En passant availability
         if isinstance(move, PawnDoublePush):
             row, col = move.end
@@ -328,6 +337,108 @@ class Game:
 
         if self.toMove == ColorChar.WHITE:
             self.fullMoveNumber += 1
+
+        self._updateFEN() 
+
+    def _updateFEN(self): 
+       
+        tempBoardStr = self._getBoardStr()
+        if not self.epTarget: epStr = '-'  
+        else: epStr = FEN.coordToSquare( self.epTarget ) 
+
+        self.FENstr = ' '.join( [tempBoardStr, str(self.toMove), self.castleRights, epStr, str( self.halfMoveClock) , str( self.fullMoveNumber) ]  ) 
+        
+         
+
+    def _getBoardStr(self):
+
+        outstr = '' 
+        for row in range(self.numRows): 
+            j = 0 
+            for col in range(self.numCols): 
+                if self._board[row][col] == None: 
+                    j += 1 
+                else: 
+                    if j!=0: 
+                        outstr = outstr +  str(j)  + self._board[row][col].__str__() 
+                    else: 
+                        outstr = outstr + self._board[row][col].__str__() 
+                    j = 0 
+
+            if j != 0 : 
+                outstr += str(j) 
+
+            outstr += '/' 
+
+        return outstr[:-1]    # remove accidentally over included '/'  
+
+
+
+    # def updateFEN(self, move ): 
+    #     ''' update the FEN after a move  
+    #         move -- a move object or subclass of move object, the flags are within the move motion 
+    #         eventually include a flags argument for special moves 
+    #     ''' 
+ 
+    #     tempBoardStr = self.getBoardStr() 
+    #    
+    #     # changes due to flags 
+    #     # castling rights -- if castle change self.castleRights = '-'. Also must check for king or rook move (based on c)  
+    #     r,c = gf.coorToNum( move.end ) 
+    #     movedPiece = self.arr[r][c]
+    #     # no more castling rights if the piece that moved (or castle but that should already be covered by king moved)  #  or isinstance( move, cm.Castle):
+    #     if isinstance( movedPiece, cp.King) or isinstance(movedPiece, cp.Rook):
+    #         if isinstance( movedPiece, cp.King ): 
+    #             toRemove = 'kq'
+    #         else:
+    #             rbegin, cbegin = gf.coorToNum( move.begin) 
+    #             if cbegin == 0: 
+    #                 toRemove = 'q'
+    #             elif cbegin == 7: 
+    #                 toRemove = 'k' 
+
+    #         if self.toMove == 'w': toRemove = toRemove.upper()   # make uppercase for white pieces  
+
+    #         newCastleRights = '' 
+    #         for char in self.castleRights: 
+    #             if char not in toRemove: 
+    #                 newCastleRights += char 
+
+    #         self.castleRights = newCastleRights
+
+
+
+    #     # ep rights
+    #     if isinstance( move, cm.PawnTwoSquare ): 
+    #         r,c = gf.coorToNum( move.end )
+    #         if self.toMove == 'w':  # white is making the pawn move 
+    #             self.epRights = gf.numToCoor( [r+1,c] ) 
+    #         else: # black made the pawn move 
+    #             self.epRights = gf.numToCoor( [r-1,c] ) 
+
+    #     else: 
+    #         self.epRights = '-'   # ep only applies for the first available move 
+
+    #     # half move clock can be reset by pawn moves or capture.
+    #     if isinstance( move, cm.PawnMove ) or isinstance(move, cm.Capture):  
+    #         self.halfMoveClock = 0 
+    #     else: 
+    #         self.halfMoveClock += 1 
+
+
+    #     # update whose move it is at the end ----------------------------
+    #     if self.toMove == 'w': 
+    #         self.toMove = 'b'
+    #    
+    #     else: 
+    #         self.toMove = 'w' 
+    #         self.fullMoveNumber += 1 
+
+
+    #     self.FEN = ' '.join( [tempBoardStr, self.toMove, self.castleRights, self.epRights, str( self.halfMoveClock) , str( self.fullMoveNumber) ]  ) 
+
+
+
 
     # def checkStatus(self, color: str) -> str:
     #     """Determine the current status of the game
