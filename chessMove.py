@@ -1,86 +1,49 @@
 #!/bin/python3
 # 2022.07.27
-# chessMove.py 
+# chessMove.py
 
-# Class for the different moves that can be made. There are subclasses for simple, captures, ep, promotion, 
+"""
+Class for the different moves that can be made.
 
-# promotion will be handled by chaning the piece according to the flag. 
-# castling will be done by a king move. 
-
-# begin -- where the piece starts.  alphanumeric code
-# end -- where the piece ends.   alphanumeric loc
-# remove -- piece to remove. alphanumeric loc 
-# addition -- piece to add to the board 
+begin -- where the piece starts
+end -- where the piece ends
+"""
 
 
-class Move: 
-    def __init__(self, begin, end) : 
+class Move:
+    """Base class for all moves"""
+
+    def __init__(self, begin, end):
         self.begin = begin
         self.end = end
 
-    def __repr__(self): 
-        return "piece moves from {} to {} ".format( self.begin, self.end ) 
+    def __str__(self):
+        return f"Piece moves from {self.begin} to {self.end}"
 
 
-class Simple(Move): 
-    def __init__(self, begin, end): 
-        super().__init__(begin, end)
+class Capture(Move):
+    """A capture of another piece"""
+
+    def __str__(self):
+        return super().__str__() + ' as a capture.'
 
 
-class Capture(Move): 
-    def __init__(self, begin, end): 
-        super().__init__(begin, end)
+class EnPassant(Capture):
+    """A capture via en passant"""
 
-    def __repr__(self): 
-        return super().__repr__() + ' as a capture. ' 
-
-# Pawn move subclasses ----------------------------------------------------
-class PawnMove(Move): 
-    def __init__(self, begin, end): 
-        super().__init__(begin, end)
+    def __str__(self):
+        return super().__str__() + ' as an en passant capture.'
 
 
-    def __repr__(self): 
-        return super().__repr__()  
+class PawnPush(Move):
+    """A pawn movement"""
 
-class PawnOneSquare(PawnMove): 
-    def __init__(self, begin, end): 
-        super().__init__(begin, end)
-
-    def __repr__(self): 
-        return super().__repr__() + ' as a pawn one step advance. ' 
+    def __str__(self):
+        return super().__str__() + ' as a pawn push.'
 
 
-class PawnTwoSquare(PawnMove): 
-    def __init__(self, begin, end): 
-        super().__init__(begin, end)
+class PawnDoublePush(PawnPush):
+    """A pawn movement of 2 squares"""
 
-
-    def __repr__(self): 
-        return super().__repr__() + ' as a pawn two step advance. ' 
-
-class PawnEP(PawnMove): 
-    def __init__(self, begin, end): 
-        super().__init__(begin, end)
-
-    def __repr__(self): 
-        return super().__repr__() + ' as a pawn ep capture. ' 
-
- 
-class PawnPromote(PawnMove): 
-    def __init__(self, begin, end, promoteFlag='Q'): 
-        super().__init__(begin, end)
-        self.promoteFlag = promoteFlag
-
-    def __repr__(self): 
-        return super().__repr__() + ' as a pawn promotion to {}. ' .format( self.promoteFlag ) 
-
-   
-
-   
-
-
-
-
-
-
+    def __str__(self):
+        return super().__str__() + ' as a pawn double push.'

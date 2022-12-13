@@ -1,220 +1,171 @@
 #!/bin/python
 
-# 2022.07.26 
-# chesspiece.py  ---   defines the piece objects 
-# 
-# Attributes: 
-#   color --  "w" or "b" 
-#   direction -- array of directions it can move in row then in column direction.  
-#   maxRange -- how far the piece can move in each of those directions 
-#       ** special for pawns -- capDirection, capMaxRange   for capture directions
+# 2022.07.26
+# chesspiece.py
+"""
+Defines the piece objects
 
-import genFun as gf
-import chessBoard as cb 
+Attributes:
+  color --  'w' or 'b'
+  direction -- array of directions it can move in row then in column direction.
+  maxRange -- how far the piece can move in each of those directions
+    ** special for pawns -- capDirection, capMaxRange for capture directions
+"""
+
+from typedefs import (
+    PieceChar,
+    ColorChar,
+    Vector
+)
+
+
+MAX_RANGE = -1
 
 
 class Piece:
-    
-    def __init__(self, color ): 
-        self.color = color  # color of the piece. Either w or b  
-        # for motion
-        self.direction = [] 
-        self.maxRange = 0
+    """A generic chess piece"""
 
-    def __repr__(self): 
-        return "x" 
+    char: PieceChar
+    color: ColorChar
+    hasMoved: bool
 
-    def __str__(self): 
-        return "x" 
+    def __init__(self, char: PieceChar, color: ColorChar):
+        """
+        Args:
+            char (str): the color of the piece ('w' or 'b')
+            color (str): the FEN representation of the piece ('k', 'q', 'b', 'n', 'r', or 'p')
+        """
+        self.char = char
+        self.color = color
 
-    def getInfo(self): 
-        return 'This is a {}'.format( gf.colordict[ self.color ]   ) 
+        self.hasMoved = False
+
+    @property
+    def moveDirection(self) -> list[Vector]:
+        """A list of directions the piece can move"""
+        raise NotImplementedError()
+
+    @property
+    def moveRange(self) -> int:
+        """The maximum number of squares the piece can move"""
+        raise NotImplementedError()
+
+    @property
+    def attackDirection(self) -> list[Vector]:
+        """A list of directions the piece can capture"""
+        return self.moveDirection
+
+    @property
+    def attackRange(self) -> int:
+        """The maximum distance the piece can capture from"""
+        return self.moveRange
+
+    def __str__(self) -> str:
+        char = self.char.value
+        return char.lower() if self.color == ColorChar.BLACK else char.upper()
+
 
 class Pawn(Piece):
+    """A chess pawn"""
 
-    def __init__(self, color ): 
-        super().__init__(color)
-        if self.color == 'w': 
-            self.direction = [ [-1,0] ]     # a8 is 0,0 so w pawns move in -y direction 
-            self.capDirection = [ [-1,-1], [-1,1] ] 
-        else: 
-            self.direction = [ [1,0] ] 
-            self.capDirection = [ [1,-1], [1, 1]  ]  
+    def __init__(self, color: ColorChar):
+        super().__init__(PieceChar.PAWN, color)
 
-        self.maxRange = 1   # how far it can move forward usually 
+    @property
+    def moveDirection(self) -> list[Vector]:
+        # a8 is (0, 0) so white pawns move in -y direction
+        if self.color == ColorChar.WHITE:
+            return [(-1, 0)]
+        return [(1, 0)]
 
-    def __repr__(self): 
-        if self.color == 'w': 
-            return 'P' 
-        else: 
-            return 'p' 
+    @property
+    def moveRange(self) -> int:
+        return 2 if not self.hasMoved else 1
 
-    def __str__(self): 
-        if self.color == 'w': 
-            return 'P' 
-        else: 
-            return 'p' 
+    @property
+    def attackDirection(self) -> list[Vector]:
+        if self.color == ColorChar.WHITE:
+            return [(-1, -1), (-1, 1)]
+        return [(1, -1), (1, 1)]
 
-
-    def getInfo(self): 
-        return super().getInfo()  + ' pawn'
+    @property
+    def attackRange(self) -> int:
+        return 1
 
 
+class Knight(Piece):
+    """A chess knight"""
+
+    def __init__(self, color: ColorChar):
+        super().__init__(PieceChar.KNIGHT, color)
+
+    @property
+    def moveDirection(self) -> list[Vector]:
+        return [(-1, 2), (1, 2), (2, 1), (2, -1),
+                (1, -2), (-1, -2), (-2, -1), (-2, 1)]
+
+    @property
+    def moveRange(self) -> int:
+        return 1
 
 
+class Bishop(Piece):
+    """A chess bishop"""
 
-class Knight(Piece): 
+    def __init__(self, color: ColorChar):
+        super().__init__(PieceChar.BISHOP, color)
 
-    def __init__(self, color ): 
-        super().__init__(color)
-        self.direction = [ [-1,2], [1,2], [2,1], [2,-1], [1,-2], [-1,-2], [-2,-1], [-2,1] ]
-        self.maxRange = 1   
+    @property
+    def moveDirection(self) -> list[Vector]:
+        return [(1, 1), (1, -1), (-1, -1), (-1, 1)]
 
-    def __repr__(self): 
-        if self.color == 'w': 
-            return 'N' 
-        else: 
-            return 'n' 
-
-    def __str__(self): 
-        if self.color == 'w': 
-            return 'N' 
-        else: 
-            return 'n' 
+    @property
+    def moveRange(self) -> int:
+        return MAX_RANGE
 
 
-    def getInfo(self): 
-        return super().getInfo()  + ' knight'
+class Rook(Piece):
+    """A chess rook"""
+
+    def __init__(self, color: ColorChar):
+        super().__init__(PieceChar.ROOK, color)
+
+    @property
+    def moveDirection(self) -> list[Vector]:
+        return [(-1, 0), (1, 0), (0, -1), (0, 1)]
+
+    @property
+    def moveRange(self) -> int:
+        return MAX_RANGE
 
 
-class Bishop(Piece): 
+class Queen(Piece):
+    """A chess queen"""
 
-    def __init__(self, color ): 
-        super().__init__(color)
-        self.direction =[ [1,1], [1,-1], [-1,-1], [-1,1] ] 
-        self.maxRange = cb.Board.nrows -1  
+    def __init__(self, color: ColorChar):
+        super().__init__(PieceChar.QUEEN, color)
 
-    def __repr__(self): 
-        if self.color == 'w': 
-            return 'B' 
-        else: 
-            return 'b' 
+    @property
+    def moveDirection(self) -> list[Vector]:
+        return [(1, 1), (1, -1), (-1, -1), (-1, 1),
+                (-1, 0), (1, 0), (0, -1), (0, 1)]
 
-    def __str__(self): 
-        if self.color == 'w': 
-            return 'B' 
-        else: 
-            return 'b' 
+    @property
+    def moveRange(self) -> int:
+        return MAX_RANGE
 
 
-    def getInfo(self): 
-        return super().getInfo()  + ' bishop'
+class King(Piece):
+    """A chess king"""
 
+    def __init__(self, color: ColorChar):
+        super().__init__(PieceChar.KING, color)
 
+    @property
+    def moveDirection(self) -> list[Vector]:
+        return [(1, 1), (1, -1), (-1, -1), (-1, 1),
+                (-1, 0), (1, 0), (0, -1), (0, 1)]
 
-
-class Rook(Piece): 
-
-    def __init__(self,  color ): 
-        super().__init__(color)
-        self.direction = [ [-1,0], [1,0], [0,-1], [0,1] ] 
-        self.maxRange = cb.Board.nrows  -1
-
-    def __repr__(self): 
-        if self.color == 'w': 
-            return 'R' 
-        else: 
-            return 'r' 
-
-    def __str__(self): 
-        if self.color == 'w': 
-            return 'R' 
-        else: 
-            return 'r' 
-
-
-    def getInfo(self): 
-        return super().getInfo()  + ' rook'
-
-
-
-class Queen(Piece): 
-
-    def __init__(self,  color ): 
-        super().__init__(color)
-        self.direction = [ [1,1], [1,-1], [-1,-1], [-1,1], [-1,0], [1,0], [0,-1], [0,1] ]
-        self.maxRange = cb.Board.nrows - 1 
-
-    def __repr__(self): 
-        if self.color == 'w': 
-            return 'Q' 
-        else: 
-            return 'q' 
-
-    def __str__(self): 
-        if self.color == 'w': 
-            return 'Q' 
-        else: 
-            return 'q' 
-
-
-    def getInfo(self): 
-        return super().getInfo()  + ' queen'
-
-
-
-class King(Piece): 
-
-    def __init__(self,  color ): 
-        super().__init__(color)
-        self.direction = [ [1,1], [1,-1], [-1,-1], [-1,1], [-1,0], [1,0], [0,-1], [0,1] ]
-        self.maxRange = 1   
-
-    def __repr__(self): 
-        if self.color == 'w': 
-            return 'K' 
-        else: 
-            return 'k' 
-
-    def __str__(self): 
-        if self.color == 'w': 
-            return 'K' 
-        else: 
-            return 'k' 
-
-
-    def getInfo(self): 
-        return super().getInfo()  + ' king'
-
-
-
-
-def createPiece( char  ): 
-    if char == char.lower():   # lowercase 
-        color = 'b' 
-    else: 
-        color = 'w' 
-
-
-    char = char.lower() 
-
-    if char == 'p': 
-        return Pawn(  color )
-
-    elif char == 'n': 
-        return Knight(  color )  
-
-    elif char == 'b': 
-        return Bishop(  color )  
-
-    elif char == 'r': 
-        return Rook(  color )  
-
-    elif char == 'q': 
-        return Queen(  color )  
-
-    elif char == 'k': 
-        return King(  color )  
-
-
-
+    @property
+    def moveRange(self) -> int:
+        return 1
