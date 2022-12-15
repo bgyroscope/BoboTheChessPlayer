@@ -39,7 +39,7 @@ initialFEN = "2kqr3/7p/8/2pP4/8/7b/p2K2PP/p7 w - c6 0 2"    # invalid of pawn pl
 initialFEN = "2kqr3/7p/8/2pP4/8/7b/p2K2PP/P7 w - c6 0 2"    # invalid of pawn placement 
 
 # initialFEN = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w Kkq - 0 1'
-# initialFEN = 'rnbqkbnr/1ppp1pp1/8/p3p2p/P3P2P/8/1PPP1PP1/RNBQKBNR w KQkq - 0 1'   # after e4 e5, h4, h5, a4 a5
+initialFEN = 'rnbqkbnr/1ppp1pp1/8/p3p2p/P3P2P/8/1PPP1PP1/RNBQKBNR w KQkq - 0 1'   # after e4 e5, h4, h5, a4 a5
 
 
 
@@ -49,7 +49,7 @@ initialFEN = "2kqr3/7p/8/2pP4/8/7b/p2K2PP/P7 w - c6 0 2"    # invalid of pawn pl
 
 
 displayGame = True
-# displayGame = False
+displayGame = False
 
 if not displayGame: 
     game = Game(initialFEN)
@@ -65,7 +65,6 @@ if not displayGame:
 
 
     print( game.getGameStatus() ) 
-
 
 
 else: 

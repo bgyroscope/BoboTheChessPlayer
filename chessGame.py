@@ -517,9 +517,25 @@ class Game:
         # invalid -- impossible positon
         # okay -- regular game play
         # checkmate -- game is over by checkmate
-        # stalemate -- game drawn by stalemate
-        # draw_50moverule -- game drawn by 50 move rule
-        # draw_3fold -- game is drawn by 3 fold repetition
+        # stalemate -- game drawn by stalemate 
+        # draw_50moverule -- game drawn by 50 move rule 
+        # draw_3fold -- game is drawn by 3 fold repetition 
+        
+        # check if position is valid based on number of kings and if a check had been missed and if pawns aren't in valid position
+        kingCount = self.countPiece( King ) 
+        if (kingCount[ColorChar.WHITE]!= 1) or (kingCount[ColorChar.BLACK]!= 1) or self.inCheck( self.toMove.opponent() ) or self.illegalPawnPlacement(): 
+            return 'invalid' 
+
+        elif self.halfMoveClock == 100: 
+            return 'draw 50 Move Rule' 
+
+        # elif value of FEN dictionary is 3 : return 'draw 3 fold repetition'   
+
+        elif len( self.getLegalMoves( self.toMove ) ) == 0: 
+            if self.inCheck( self.toMove ): 
+                return 'checkmate' 
+            else: 
+                return 'stalemate' 
 
         # check if position is valid based on number of kings and if a
         # check had been missed and if pawns aren't in valid position
