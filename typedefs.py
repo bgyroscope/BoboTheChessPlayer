@@ -31,6 +31,7 @@ class ColorChar(Enum):
     WHITE = 'w'
     BLACK = 'b'
 
+    @property
     def opponent(self) -> ColorChar:
         """Returns this color's opposing color"""
 

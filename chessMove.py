@@ -9,11 +9,13 @@ begin -- where the piece starts
 end -- where the piece ends
 """
 
+from typedefs import Coord
+
 
 class Move:
     """Base class for all moves"""
 
-    def __init__(self, begin, end):
+    def __init__(self, begin: Coord, end: Coord):
         self.begin = begin
         self.end = end
 
@@ -25,34 +27,39 @@ class Capture(Move):
     """A capture of another piece"""
 
     def __str__(self):
-        return super().__str__() + ' as a capture.'
+        return super().__str__() + " as a capture."
 
 
 class EnPassant(Capture):
     """A capture via en passant"""
 
     def __str__(self):
-        return super().__str__() + ' as an en passant capture.'
+        return super().__str__() + " as an en passant capture."
 
 
 class PawnPush(Move):
     """A pawn movement"""
 
     def __str__(self):
-        return super().__str__() + ' as a pawn push.'
+        return super().__str__() + " as a pawn push."
 
 
 class PawnDoublePush(PawnPush):
     """A pawn movement of 2 squares"""
 
     def __str__(self):
-        return super().__str__() + ' as a pawn double push.'
+        return super().__str__() + " as a pawn double push."
 
 
-class Castle(Move): 
-    """castling either kingside or queenside""" 
-    def __str__(self): 
+class PawnPromotion(PawnPush):
+    """A pawn promotion, whether by push or capture"""
+
+    def __str__(self):
+        return super().__str__() + " as a pawn promotion."
+
+
+class Castle(Move):
+    """Castling either king-side or queen-side"""
+
+    def __str__(self):
         return super().__str__() + ' as in castling '
-        
-
-
