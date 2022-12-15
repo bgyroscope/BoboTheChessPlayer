@@ -25,6 +25,7 @@ from chessPiece import (
 BoardArray = list[list[(Piece | None)]]
 BoardEnumerator = Iterator[tuple[int, int, (Piece | None)]]
 
+
 class Position:
     """Manages the position logic, such as moves, captures, win/loss, etc."""
 
@@ -40,7 +41,6 @@ class Position:
     def __init__(self, startPos: str = STANDARD_START_POSITION):
         self.fenStr = startPos
         self.setState(startPos)
-
 
     def setState(self, fen: str):
         """Sets the game state from a Forsyth-Edwards Notation (FEN) string
@@ -179,9 +179,6 @@ class Position:
 
         moves = self._getPiecePseudoLegalMoves(row, col, piece)
         moves += self._getPiecePseudoLegalCaptures(row, col, piece)
-
-        # next line returns moves before checking if legal
-        # return moves
 
         # check which moves are legal
         return [move for move in moves if not self.moveIntoCheck(move)]
@@ -357,7 +354,6 @@ class Position:
                 self._board[endRow][endCol+1] = Rook(piece.color)
 
         self._updateState(move)
-        # print( self.FENstr)
 
     def _updateState(self, move: Move):
 
@@ -488,25 +484,9 @@ class Position:
         # invalid -- impossible positon
         # okay -- regular game play
         # checkmate -- game is over by checkmate
-        # stalemate -- game drawn by stalemate 
-        # draw_50moverule -- game drawn by 50 move rule 
-        # draw_3fold -- game is drawn by 3 fold repetition 
-        
-        # check if position is valid based on number of kings and if a check had been missed and if pawns aren't in valid position
-        kingCount = self.countPiece( King ) 
-        if (kingCount[ColorChar.WHITE]!= 1) or (kingCount[ColorChar.BLACK]!= 1) or self.inCheck( self.toMove.opponent() ) or self.illegalPawnPlacement(): 
-            return 'invalid' 
-
-        elif self.halfMoveClock == 100: 
-            return 'draw 50 Move Rule' 
-
-        # elif value of FEN dictionary is 3 : return 'draw 3 fold repetition'   
-
-        elif len( self.getLegalMoves( self.toMove ) ) == 0: 
-            if self.inCheck( self.toMove ): 
-                return 'checkmate' 
-            else: 
-                return 'stalemate' 
+        # stalemate -- game drawn by stalemate
+        # draw_50moverule -- game drawn by 50 move rule
+        # draw_3fold -- game is drawn by 3 fold repetition
 
         # check if position is valid based on number of kings and if a
         # check had been missed and if pawns aren't in valid position

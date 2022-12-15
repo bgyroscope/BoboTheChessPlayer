@@ -11,6 +11,7 @@ import random
 from typing import Iterator
 
 from typedefs import ColorChar
+from chessPosition import Position
 from chessMove import Move
 from chessPiece import Piece
 
@@ -24,7 +25,7 @@ class Player:
         self.color = color
 
     def decideMove(self,
-                   board: BoardArray,
+                   board: Position,
                    possMoves: list[Move]) -> Iterator[(None | Move)]:
         """Starts the player's move decision process
 
