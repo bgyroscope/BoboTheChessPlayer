@@ -5,6 +5,7 @@
 
 from typedefs import Coord
 
+STANDARD_START_POSITION = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
 
 def squareToCoord(square: str) -> Coord:
     """Converts a square location a1 etc. to the corresponding (row, col) tuple"""

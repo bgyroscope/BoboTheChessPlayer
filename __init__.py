@@ -12,8 +12,8 @@ import pygame
 import gui
 from gui import Display
 from typedefs import ColorChar
-from chessGame import Game
-from chessBoard import Board
+from chessGamePlay import Game
+from chessBoardDisplay import Board
 from chessPlayer import Human, RandomComp
 
 DISPLAY_WIDTH = 800
