@@ -58,7 +58,7 @@ if not displayGame:
     # print( '\n further testing: \n',  game.getLegalMoves(game.toMove) )
 
 
-    print( game.FENstr ) 
+    print( game.fenStr ) 
     for piece in ( King, Queen, Bishop, Knight, Pawn ): 
         helpdict = game.countPiece( piece ) 
         print( 'The number of white {} is {}, where as black is {}'.format(str(piece), helpdict[ColorChar.WHITE], helpdict[ColorChar.BLACK]  )  ) 

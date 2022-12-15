@@ -44,21 +44,26 @@ class Piece:
     @property
     def moveDirection(self) -> list[Vector]:
         """A list of directions the piece can move"""
-        raise NotImplementedError("Child class does not implement moveDirection")
+
+        raise NotImplementedError(
+            "Child class does not implement moveDirection")
 
     @property
     def moveRange(self) -> int:
         """The maximum number of squares the piece can move"""
+
         raise NotImplementedError("Child class does not implement moveRange")
 
     @property
     def attackDirection(self) -> list[Vector]:
         """A list of directions the piece can capture"""
+
         return self.moveDirection
 
     @property
     def attackRange(self) -> int:
         """The maximum distance the piece can capture from"""
+
         return self.moveRange
 
     def __str__(self) -> str:
@@ -93,6 +98,7 @@ class Pawn(Piece):
     @property
     def attackRange(self) -> int:
         return 1
+
 
 class Knight(Piece):
     """A chess knight"""
@@ -170,4 +176,3 @@ class King(Piece):
     @property
     def moveRange(self) -> int:
         return 1
-
