@@ -94,16 +94,6 @@ class Pawn(Piece):
     def attackRange(self) -> int:
         return 1
 
-    # special pawn properties-------------------- 
-    @property 
-    def specialStep(self) -> int:
-        return 2
-
-    @property 
-    def specialDirection(self) -> list[Vector]: 
-        return self.moveDirection 
-
-
 class Knight(Piece):
     """A chess knight"""
 
@@ -180,15 +170,4 @@ class King(Piece):
     @property
     def moveRange(self) -> int:
         return 1
-
-    # special castle properties-------------------- 
-    @property 
-    def specialStep(self) -> int:
-        return 2
-
-    @property 
-    def specialDirection(self) -> list[Vector]: 
-        return [(0,1)] # kingside direction. Queenside handled the other way 
-
-
 
