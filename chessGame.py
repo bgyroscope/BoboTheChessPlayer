@@ -231,7 +231,7 @@ class Game:
                 rookRow, rookCol = self.rookHomeSquare[ self.toMove ][ pieceChar ] 
 
                 # check squares between the king and rook are empty 
-                if sum( [ self._board[row][col+moveDir[1]*i ] == None for i in range(1, abs(col - rookCol) ) ]  ):  
+                if sum( [ self._board[row][col+moveDir[1]*i ] == None for i in range(1, abs(col - rookCol) ) ]  ) == abs(col-rookCol) -1:  
                     # check that the king isn't walking through or into check  
                     if sum([ not self.isSquareAttacked( (row, col+moveDir[1]*i), self.toMove.opponent()  ) for i in range(1,3) ]  ) == 2:   
                         newr = row + moveDir[0] * 2
@@ -474,7 +474,7 @@ class Game:
         
         # check if position is valid based on number of kings and if a check had been missed and if pawns aren't in valid position
         kingCount = self.countPiece( King ) 
-        if (kingCount[ColorChar.WHITE]!= 1) or (kingCount[ColorChar.BLACK]!= 1) or self.inCheck( self.toMove.opponent() ) or self.illegalPawnPlacement: 
+        if (kingCount[ColorChar.WHITE]!= 1) or (kingCount[ColorChar.BLACK]!= 1) or self.inCheck( self.toMove.opponent() ) or self.illegalPawnPlacement(): 
             return 'invalid' 
 
         elif self.halfMoveClock == 100: 
