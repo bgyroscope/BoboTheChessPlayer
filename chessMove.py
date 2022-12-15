@@ -48,29 +48,13 @@ class PawnDoublePush(PawnPush):
     """A pawn movement of 2 squares"""
 
     def __str__(self):
-        return super().__str__() + " as a pawn double push."
+        return super().__str__() + ' as a pawn double push.'
 
 
-class Promotion(Move):
-    """A generic pawn promotion"""
-
-    def __init__(self, begin: Coord, end: Coord):
-        super().__init__(begin, end)
-        self.toPiece = PieceChar.QUEEN
-
-    def __str__(self):
-        return super().__str__() + " as a promotion"
+class Castle(Move): 
+    """castling either kingside or queenside""" 
+    def __str__(self): 
+        return super().__str__() + ' as in castling '
+        
 
 
-class PushAndPromote(Promotion, PawnPush):
-    """A pawn promotion by simple movement"""
-
-    def __str__(self):
-        return super().__str__() + " by pawn push."
-
-
-class CaptureAndPromote(Promotion, Capture):
-    """A pawn promotion by capture"""
-
-    def __str__(self):
-        return super().__str__() + " by capture."
