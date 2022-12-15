@@ -134,7 +134,7 @@ class Displayable:
         """Returns a pygame surface to be displayed
         """
         raise NotImplementedError(
-            "Child class does not override render method")
+            "Child class does not implement render method")
 
     def handle(self, event: Event) -> bool:
         """Responds to events passed to the displayable

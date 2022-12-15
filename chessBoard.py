@@ -32,6 +32,7 @@ from typedefs import (
 from gui import Displayable, Image
 from chessGame import Game
 from chessPiece import Piece
+from chessPlayer import Human
 
 SQUARE_HOVER_COLOR = (192, 192, 0, 128)
 SQUARE_SELECT_COLOR = (255, 255, 0, 128)
@@ -43,6 +44,7 @@ class Board(Displayable):
     """A chess board displayable"""
 
     _game: Game
+    _player: Human
     _boardImage: Image
     _piecesImage: Image
     _cellSize: int
@@ -54,6 +56,10 @@ class Board(Displayable):
                  boardImage: Image,
                  piecesImage: Image):
         self._game = game
+        # Assumes one of the players is a human player
+        self._player = next(player
+                            for player in game.players.values()
+                            if isinstance(player, Human))
 
         self._boardImage = boardImage
         self._piecesImage = piecesImage
@@ -153,7 +159,7 @@ class Board(Displayable):
             selectedMove = next(
                 (move for move in moves if move.end == coords), None)
             if selectedMove is not None:
-                self._game.executeMove(selectedMove)
+                self._player.selectedMove = selectedMove
             self._selectedSquare = None
 
     def _screenPosToCoord(self, x: int, y: int) -> Coord:

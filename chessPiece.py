@@ -43,12 +43,12 @@ class Piece:
     @property
     def moveDirection(self) -> list[Vector]:
         """A list of directions the piece can move"""
-        raise NotImplementedError()
+        raise NotImplementedError("Child class does not implement moveDirection")
 
     @property
     def moveRange(self) -> int:
         """The maximum number of squares the piece can move"""
-        raise NotImplementedError()
+        raise NotImplementedError("Child class does not implement moveRange")
 
     @property
     def attackDirection(self) -> list[Vector]:

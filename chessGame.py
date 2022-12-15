@@ -1,4 +1,4 @@
-from typing import Generator
+from typing import Iterator
 
 from typedefs import PieceChar, ColorChar, Coord
 import fen as FEN
@@ -19,8 +19,10 @@ from chessPiece import (
     Rook,
     Pawn
 )
+from chessPlayer import Player
 
-BoardGenerator = Generator[tuple[int, int, (Piece | None)], None, None]
+BoardArray = list[list[(Piece | None)]]
+BoardEnumerator = Iterator[tuple[int, int, (Piece | None)]]
 
 STANDARD_START_POSITION = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w kqKQ - 0 1'
 
@@ -34,10 +36,21 @@ class Game:
     halfMoveClock: int
     fullMoveNumber: int
 
-    _board: list[list[(Piece | None)]]
+    players: dict[ColorChar, Player]
+    _board: BoardArray
+    _moveQueue: (Iterator[(None | Move)] | None)
 
-    def __init__(self, startPos: str = STANDARD_START_POSITION):
+    def __init__(self,
+                 whitePlayer: Player,
+                 blackPlayer: Player,
+                 startPos: str = STANDARD_START_POSITION):
+        self.players = {
+            ColorChar.WHITE: whitePlayer,
+            ColorChar.BLACK: blackPlayer
+        }
         self.setState(startPos)
+
+        self._moveQueue = None
 
     def setState(self, fen: str):
         """Sets the game state from a Forsyth-Edwards Notation (FEN) string
@@ -96,17 +109,34 @@ class Game:
 
         return Pawn(colorChar)
 
+    def update(self):
+        """Checks if the active player has selected
+        their move, and if so, executes it
+        """
+        activePlayer = self.players[self.toMove]
+        if self._moveQueue is None:
+            board = self._board
+            moves = self.getLegalMoves(self.toMove)
+            self._moveQueue = activePlayer.decideMove(board, moves)
+
+        move = next(self._moveQueue)
+        if move is not None:
+            self.executeMove(move)
+            self._moveQueue = None
+
     @property
-    def numRows(self) -> int:  # pylint: disable=missing-function-docstring
+    def numRows(self) -> int:
+        """The number of rows the board has"""
         return len(self._board)
 
     @property
-    def numCols(self) -> int:  # pylint: disable=missing-function-docstring
+    def numCols(self) -> int:
+        """The number of columns the board has"""
         if self.numRows == 0:
             return 0
         return len(self._board[0])
 
-    def enumerateBoard(self) -> BoardGenerator:
+    def enumerateBoard(self) -> BoardEnumerator:
         """Generator of (row, col, piece) tuples"""
 
         for i, row in enumerate(self._board):

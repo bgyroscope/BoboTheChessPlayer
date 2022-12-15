@@ -11,8 +11,10 @@ import pygame
 
 import gui
 from gui import Display
+from typedefs import ColorChar
 from chessGame import Game
 from chessBoard import Board
+from chessPlayer import Human, RandomComp
 
 DISPLAY_WIDTH = 800
 DISPLAY_HEIGHT = 800
@@ -21,7 +23,9 @@ DISPLAY_HEIGHT = 800
 if __name__ == '__main__':
     window = Display(DISPLAY_WIDTH, DISPLAY_HEIGHT)
 
-    game = Game()
+    user = Human(ColorChar.WHITE)
+    comp = RandomComp(ColorChar.BLACK)
+    game = Game(user, comp)
 
     boardImage = gui.loadImage('images/chess_board.png')
     piecesImage = gui.loadImage('images/chess_pieces.png')
@@ -31,6 +35,7 @@ if __name__ == '__main__':
     window.show()
 
     while window.state != gui.QUIT:
+        game.update()
         window.tick()
 
     pygame.quit()
