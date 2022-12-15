@@ -7,7 +7,6 @@ Defines the piece objects
 
 Attributes:
   color --  'w' or 'b'
-  homeRow -- 7 for white pieces (6 for pawn) and 0 for black pieces (1 for pawns)
   direction -- array of directions it can move in row then in column direction.
   maxRange -- how far the piece can move in each of those directions
     ** special for pawns -- capDirection, capMaxRange for capture directions
@@ -43,11 +42,6 @@ class Piece:
         # self.hasMoved = False
 
     @property
-    def homeRow(self) -> int:
-        return 7 if self.color == ColorChar.WHITE else 0  # 7 for numRows-1
-
-
-    @property
     def moveDirection(self) -> list[Vector]:
         """A list of directions the piece can move"""
         raise NotImplementedError()
@@ -75,10 +69,6 @@ class Piece:
 class Pawn(Piece):
     """A chess pawn"""
 
-    @property
-    def homeRow(self) -> int:
-        return 6 if self.color == ColorChar.WHITE else 1
-
     def __init__(self, color: ColorChar):
         super().__init__(PieceChar.PAWN, color)
 
@@ -103,16 +93,6 @@ class Pawn(Piece):
     @property
     def attackRange(self) -> int:
         return 1
-
-    # special pawn properties-------------------- 
-    @property 
-    def specialStep(self) -> int:
-        return 2
-
-    @property 
-    def specialDirection(self) -> list[Vector]: 
-        return self.moveDirection 
-
 
 class Knight(Piece):
     """A chess knight"""
@@ -190,3 +170,4 @@ class King(Piece):
     @property
     def moveRange(self) -> int:
         return 1
+

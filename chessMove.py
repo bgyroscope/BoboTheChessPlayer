@@ -47,3 +47,12 @@ class PawnDoublePush(PawnPush):
 
     def __str__(self):
         return super().__str__() + ' as a pawn double push.'
+
+
+class Castle(Move): 
+    """castling either kingside or queenside""" 
+    def __str__(self): 
+        return super().__str__() + ' as in castling '
+        
+
+

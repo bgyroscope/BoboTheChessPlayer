@@ -7,7 +7,8 @@ from chessMove import (
     Capture,
     EnPassant,
     PawnPush,
-    PawnDoublePush
+    PawnDoublePush,
+    Castle
 )
 import chessPiece
 from chessPiece import (
@@ -22,14 +23,15 @@ from chessPiece import (
 
 BoardGenerator = Generator[tuple[int, int, (Piece | None)], None, None]
 
-STANDARD_START_POSITION = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w kqKQ - 0 1'
+STANDARD_START_POSITION = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
 
 
 class Game:
     """Manages the game logic, such as moves, captures, win/loss, etc."""
 
     toMove: ColorChar
-    castleRights: str
+    ## castleRights: str
+    castleRights: dict[ dict[ bool ] ]  # color then piece char to access rights
     epTarget: (Coord | None)
     halfMoveClock: int
     fullMoveNumber: int
@@ -50,7 +52,16 @@ class Game:
         temp = fen.split(' ')
         self.setPosition(temp[0])
         self.toMove = ColorChar(temp[1])
-        self.castleRights = temp[2]
+
+        self.castleRights = dict( { ColorChar.WHITE: dict({PieceChar.KING: False, PieceChar.QUEEN: False  }  ), 
+                                    ColorChar.BLACK: dict({PieceChar.KING: False, PieceChar.QUEEN: False  }  )
+                                    } ) 
+        for char in temp[2]:
+            if   char == 'K': self.castleRights[ ColorChar.WHITE ][ PieceChar.KING  ] = True  
+            elif char == 'Q': self.castleRights[ ColorChar.WHITE ][ PieceChar.QUEEN ] = True 
+            elif char == 'k': self.castleRights[ ColorChar.BLACK ][ PieceChar.KING  ] = True 
+            elif char == 'q': self.castleRights[ ColorChar.BLACK ][ PieceChar.QUEEN ] = True 
+
         self.epTarget = FEN.squareToCoord(temp[3]) if temp[3] != '-' else None
         self.halfMoveClock = int(temp[4])
         self.fullMoveNumber = int(temp[5])
@@ -108,6 +119,18 @@ class Game:
             return 0
         return len(self._board[0])
 
+    # define home rows for pawns and home squares for rooks 
+    @property 
+    def pawnHomeRow(self) -> dict[int]: 
+        return dict( {ColorChar.WHITE: self.numRows-2, ColorChar.BLACK: 1 } ) 
+
+    @property
+    def rookHomeSquare(self) -> dict[dict[Coord]]: 
+        return dict( { 
+                ColorChar.WHITE: dict( {PieceChar.KING: ( self.numRows-1, self.numCols-1),  PieceChar.QUEEN: (self.numRows-1,0) } ), 
+                ColorChar.BLACK: dict( {PieceChar.KING: ( 0, self.numCols-1),               PieceChar.QUEEN: (0,0) } )
+        } ) 
+
     def enumerateBoard(self) -> BoardGenerator:
         """Generator of (row, col, piece) tuples"""
 
@@ -151,21 +174,12 @@ class Game:
 
         moves = self._getPiecePseudoLegalMoves(row, col, piece)
         moves += self._getPiecePseudoLegalCaptures(row, col, piece)
-        moves += self._getPiecePseudoLegalSpecialStep(row, col, piece)   # to incorporate initial double step of pawn and castling
 
+        # next line returns moves before checking if legal 
         # return moves
 
-        # check that the moves are legal
-        idxToRemove = [] 
-        for idx, move in enumerate(moves): 
-            if self.moveIntoCheck( move ): 
-                idxToRemove.append(idx)     
-
-        return [move for idx, move in enumerate(moves) if idx not in idxToRemove]  
-
-        # now also consider castling, en passant, pawn promotion
-        # also must check if a move puts the player in check
-
+        # # check that the moves are legal
+        return [move for move in moves if not self.moveIntoCheck(move)]
 
     def _getPiecePseudoLegalMoves(self, row: int, col: int, piece: Piece) -> list[Move]:
         moves = []
@@ -175,6 +189,8 @@ class Game:
             moveRange = self.numRows
         else:
             moveRange = piece.moveRange
+            if isinstance(piece, Pawn) and row == self.pawnHomeRow[self.toMove]: 
+                moveRange += 1 
 
         for moveDir in piece.moveDirection:
             for i in range(1, moveRange + 1):
@@ -190,14 +206,42 @@ class Game:
                     break
 
                 end = (newr, newc)
-                move = Move(start,end) 
-                # if isinstance(piece, Pawn) and i == 2:
-                #     move = PawnDoublePush(start, end)
-                # else:
-                #     move = Move(start, end)
+                # move = Move(start,end) 
+                if isinstance(piece, Pawn) and i == 2:
+                    move = PawnDoublePush(start, end)
+                else:
+                    move = Move(start, end)
                 moves.append(move)
 
+        if isinstance( piece, King): 
+            moves += self._getPiecePseudoLegalCastle( row, col, piece)
+
         return moves
+
+
+    def _getPiecePseudoLegalCastle(self, row: int, col: int, piece: Piece) -> list[Move]: 
+        """ Since castling is such a unique move, it will be handled separately here. """
+        if not isinstance( piece, King ): 
+            return [] 
+            
+        start = (row, col)
+        moves = [] 
+        for moveDir, pieceChar in ( ( (0,1),PieceChar.KING), ( (0,-1),PieceChar.QUEEN) ) : 
+            if self.castleRights[ self.toMove ][ pieceChar ]: 
+                rookRow, rookCol = self.rookHomeSquare[ self.toMove ][ pieceChar ] 
+
+                # check squares between the king and rook are empty 
+                if sum( [ self._board[row][col+moveDir[1]*i ] == None for i in range(1, abs(col - rookCol) ) ]  ):  
+                    # check that the king isn't walking through or into check  
+                    if sum([ not self.isSquareAttacked( (row, col+moveDir[1]*i), self.toMove.opponent()  ) for i in range(1,3) ]  ) == 2:   
+                        newr = row + moveDir[0] * 2
+                        newc = col + moveDir[1] * 2 
+                        end = (newr, newc)
+
+                        moves.append(  Castle(start, end)  ) 
+
+        return moves  
+
 
     def _getPiecePseudoLegalCaptures(self, row: int, col: int, piece: Piece) -> list[Move]:
         captures = []
@@ -247,35 +291,6 @@ class Game:
 
         return attacks
 
-    def _getPiecePseudoLegalSpecialStep(self, row: int, col: int, piece: Piece) -> list[Move]: 
-        specialSteps = [] 
-        start = (row, col) 
-
-        if isinstance(piece, Pawn):   # or isinstance(piece, (Pawn,King) ): 
-
-            for moveDir in piece.specialDirection:
-                newr = row + moveDir[0] * piece.specialStep
-                newc = col + moveDir[1] * piece.specialStep
-
-                if self._coordOutOfBounds(newr, newc):
-                    continue
-
-                target = self._board[newr][newc]
-                if target is not None:
-                    continue
-
-                end = (newr, newc)
-
-                move = None
-                if isinstance( piece, Pawn) and row == piece.homeRow: 
-                    move = PawnDoublePush(start, end) 
-                # elif isinstance( piece, King)  
-
-                if move:
-                    specialSteps.append(move)
-
-        return specialSteps
-
     def isSquareAttacked(self, square: Coord, color: ColorChar) -> bool:
         """Returns whether the given square is attacked by a piece of the given color"""
 
@@ -295,7 +310,6 @@ class Game:
         piece = self._board[startRow][startCol]
         if piece is None:
             return
-        piece.hasMoved = True
 
         # Handles both moving & (normal) capturing
         self._board[endRow][endCol] = piece
@@ -315,14 +329,34 @@ class Game:
                  or (piece.color == ColorChar.BLACK and endRow == self.numRows - 1)):
             self._board[endRow][endCol] = Queen(piece.color)
 
-        self._updateState(move)
-        # print( self.toMove, self.castleRights, self.epTarget, self.halfMoveClock, self.fullMoveNumber ) 
+        # Castling 
+        if isinstance( move, Castle ) : 
+            if endCol > startCol: # Kingside castle 
+                rookRow, rookCol = self.rookHomeSquare[self.toMove][PieceChar.KING] 
+                self._board[rookRow][rookCol] = None
+                self._board[endRow][endCol-1] = Rook(piece.color) 
+            else: # queenside 
+                rookRow, rookCol = self.rookHomeSquare[self.toMove][PieceChar.QUEEN] 
+                self._board[rookRow][rookCol] = None
+                self._board[endRow][endCol+1] = Rook(piece.color) 
 
+        self._updateState(move)
+        # print( self.FENstr) 
 
     def _updateState(self, move: Move):
 
-        # Caslting rights  castleRights
+        # Castling rights 
+        movedPiece = self. _board[move.end[0]][move.end[1]]
+        if isinstance( movedPiece, King): 
+            self.castleRights[ self.toMove ][ PieceChar.KING  ] = False 
+            self.castleRights[ self.toMove ][ PieceChar.QUEEN ] = False 
 
+
+        elif isinstance( movedPiece, Rook): 
+            for pieceChar in ( PieceChar.KING, PieceChar.QUEEN ) : 
+                if move.begin == self.rookHomeSquare[ self.toMove][ pieceChar ]: 
+                    self.castleRights[ self.toMove ][ pieceChar ] = False 
+                   
         # En passant availability
         if isinstance(move, PawnDoublePush):
             row, col = move.end
@@ -345,16 +379,25 @@ class Game:
         if self.toMove == ColorChar.WHITE:
             self.fullMoveNumber += 1
 
-        self._updateFEN() 
+        self._updateFEN()
 
     def _updateFEN(self): 
        
         tempBoardStr = self._getBoardStr()
         # to format the FEN correctly, convert enum to string
-        toMoveStr = 'w' if self.toMove == ColorChar.WHITE else 'b'  
+
+        # self.castleRights
+        castleStr = ''
+        if self.castleRights[ ColorChar.WHITE ][ PieceChar.KING  ]: castleStr += 'K'
+        if self.castleRights[ ColorChar.WHITE ][ PieceChar.QUEEN ]: castleStr += 'Q'
+        if self.castleRights[ ColorChar.BLACK ][ PieceChar.KING  ]: castleStr += 'k'
+        if self.castleRights[ ColorChar.BLACK ][ PieceChar.QUEEN ]: castleStr += 'q'
+
+        if len(castleStr) == 0: castleStr = '-'
+
         epStr = '-' if not self.epTarget else FEN.coordToSquare( self.epTarget ) 
 
-        self.FENstr = ' '.join( [tempBoardStr, toMoveStr, self.castleRights, epStr, str( self.halfMoveClock) , str( self.fullMoveNumber) ]  ) 
+        self.FENstr = ' '.join( [tempBoardStr, self.toMove.value, castleStr, epStr, str( self.halfMoveClock) , str( self.fullMoveNumber) ]  ) 
 
     def _getBoardStr(self):
 
@@ -399,105 +442,56 @@ class Game:
         tempGame = Game( self.FENstr ) 
         tempGame.executeMove( move  )
 
-        if not tempGame.inCheck( self.toMove ): 
-            return False
-        else: return True 
+        return tempGame.inCheck( self.toMove )
+
+    def countPiece(self, pieceToFind: Piece) ->  dict[int]: 
+        """ find the number of piece of each color on the board  """ 
+        countDict = dict( {ColorChar.WHITE: 0, ColorChar.BLACK: 0} )  
+        for row, col, piece in self.enumerateBoard():
+            if isinstance(piece, pieceToFind): countDict[piece.color] += 1 
+        return countDict
 
 
-    # def updateFEN(self, move ): 
-    #     ''' update the FEN after a move  
-    #         move -- a move object or subclass of move object, the flags are within the move motion 
-    #         eventually include a flags argument for special moves 
-    #     ''' 
- 
-    #     tempBoardStr = self.getBoardStr() 
-    #    
-    #     # changes due to flags 
-    #     # castling rights -- if castle change self.castleRights = '-'. Also must check for king or rook move (based on c)  
-    #     r,c = gf.coorToNum( move.end ) 
-    #     movedPiece = self.arr[r][c]
-    #     # no more castling rights if the piece that moved (or castle but that should already be covered by king moved)  #  or isinstance( move, cm.Castle):
-    #     if isinstance( movedPiece, cp.King) or isinstance(movedPiece, cp.Rook):
-    #         if isinstance( movedPiece, cp.King ): 
-    #             toRemove = 'kq'
-    #         else:
-    #             rbegin, cbegin = gf.coorToNum( move.begin) 
-    #             if cbegin == 0: 
-    #                 toRemove = 'q'
-    #             elif cbegin == 7: 
-    #                 toRemove = 'k' 
+    def illegalPawnPlacement(self) -> bool: 
+        """ detects if pawns are in invalid positions. (1st or last rank) """
+        for row in (0, self.numRows-1): 
+            for piece in self._board[row]: 
+                if isinstance(piece, Pawn): 
+                    return True 
 
-    #         if self.toMove == 'w': toRemove = toRemove.upper()   # make uppercase for white pieces  
+        return False
 
-    #         newCastleRights = '' 
-    #         for char in self.castleRights: 
-    #             if char not in toRemove: 
-    #                 newCastleRights += char 
+    def getGameStatus(self) -> str: 
+        """ returns a string the reports the status of a position. """ 
 
-    #         self.castleRights = newCastleRights
+        # maybe make an enum class 
+        # invalid -- impossible positon
+        # okay -- regular game play
+        # checkmate -- game is over by checkmate
+        # stalemate -- game drawn by stalemate 
+        # draw_50moverule -- game drawn by 50 move rule 
+        # draw_3fold -- game is drawn by 3 fold repetition 
+        
+        # check if position is valid based on number of kings and if a check had been missed and if pawns aren't in valid position
+        kingCount = self.countPiece( King ) 
+        if (kingCount[ColorChar.WHITE]!= 1) or (kingCount[ColorChar.BLACK]!= 1) or self.inCheck( self.toMove.opponent() ) or self.illegalPawnPlacement: 
+            return 'invalid' 
 
+        elif self.halfMoveClock == 100: 
+            return 'draw 50 Move Rule' 
 
+        # elif value of FEN dictionary is 3 : return 'draw 3 fold repetition'   
 
-    #     # ep rights
-    #     if isinstance( move, cm.PawnTwoSquare ): 
-    #         r,c = gf.coorToNum( move.end )
-    #         if self.toMove == 'w':  # white is making the pawn move 
-    #             self.epRights = gf.numToCoor( [r+1,c] ) 
-    #         else: # black made the pawn move 
-    #             self.epRights = gf.numToCoor( [r-1,c] ) 
+        elif len( self.getLegalMoves( self.toMove ) ) == 0: 
+            if self.inCheck( self.toMove ): 
+                return 'checkmate' 
+            else: 
+                return 'stalemate' 
 
-    #     else: 
-    #         self.epRights = '-'   # ep only applies for the first available move 
-
-    #     # half move clock can be reset by pawn moves or capture.
-    #     if isinstance( move, cm.PawnMove ) or isinstance(move, cm.Capture):  
-    #         self.halfMoveClock = 0 
-    #     else: 
-    #         self.halfMoveClock += 1 
-
-
-    #     # update whose move it is at the end ----------------------------
-    #     if self.toMove == 'w': 
-    #         self.toMove = 'b'
-    #    
-    #     else: 
-    #         self.toMove = 'w' 
-    #         self.fullMoveNumber += 1 
-
-
-    #     self.FEN = ' '.join( [tempBoardStr, self.toMove, self.castleRights, self.epRights, str( self.halfMoveClock) , str( self.fullMoveNumber) ]  ) 
+        else: 
+            return 'okay' 
+        
 
 
 
-
-    # def checkStatus(self, color: str) -> str:
-    #     """Determine the current status of the game
-
-    #     Args:
-    #         color (str): either 'b' or 'w'
-
-    #     Returns:
-    #         str: one of ['in prog', 'invalid', 'draw', 'checkmate']
-    #     """
-
-    #     # find the kings
-    #     nw, nb = self.findKings()
-    #     if nw == 0 and nb == 0 or nw > 1 or nb > 1:
-    #         return "invalid"
-
-    #     if nw == 1 and nb == 1:
-
-    #         if not moveArr:
-    #             moveArr = self.getAvaiableMoves(color)
-
-    #         if moveArr == []:
-    #             return "draw"
-    #         else:
-    #             return "in prog"
-
-    #     else:
-    #         if (color == 'w' and nw == 0) or (color == 'b' and nb == 0):
-    #             return "checkmate"
-    #         else:
-    #             return "invalid"
 
