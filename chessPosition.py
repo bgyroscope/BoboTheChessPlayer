@@ -1,6 +1,6 @@
 from typing import Iterator
 
-from typedefs import PieceChar, ColorChar, Coord
+from typedefs import PieceChar, ColorChar, PositionStatus, Outcome, Coord
 import fen as FEN
 from fen import STANDARD_START_POSITION
 from chessMove import (
@@ -34,6 +34,7 @@ class Position:
     halfMoveClock: int
     fullMoveNumber: int
     fenStr: str
+    positionHistory: dict[str, int]   # dictionary of FEN without move counts  
 
     _board: BoardArray
 
@@ -70,8 +71,12 @@ class Position:
         self.halfMoveClock = int(temp[4])
         self.fullMoveNumber = int(temp[5])
 
+        # initial FEN 
+        self._updateFEN()
+
         # set for determining three fold repetition
-        # self.pos = set()
+        self.positionHistory = {}
+        self.positionHistory.setdefault( self._getPositionHistoryStr() , 1 )
 
     def setPosition(self, position: str):
         """Sets the position of pieces on the board
@@ -396,6 +401,17 @@ class Position:
 
         self._updateFEN()
 
+        # add the updated position to the positionHistory 
+        positionHistoryStr = self._getPositionHistoryStr() 
+        self.positionHistory.setdefault( positionHistoryStr, 0 )
+        self.positionHistory[ positionHistoryStr ] += 1 
+
+        # print( self.positionHistory ) 
+
+    def _getPositionHistoryStr(self): 
+        return ' '.join( self.fenStr.split(' ')[0:4]   ) 
+
+
     def _updateFEN(self):
         tempBoardStr = self._getBoardStr()
 
@@ -481,48 +497,56 @@ class Position:
 
         return False
 
-    def getPositionStatus(self) -> str:
-        """ returns a string the reports the status of a position. """
+    def getPositionStatus(self) -> PositionStatus:
+        """ returns a string the reports the status of a position and message describing """
 
-        # maybe make an enum class
-        # invalid -- impossible positon
-        # okay -- regular game play
-        # checkmate -- game is over by checkmate
-        # stalemate -- game drawn by stalemate 
-        # draw_50moverule -- game drawn by 50 move rule 
-        # draw_3fold -- game is drawn by 3 fold repetition 
-        
+       
         # check if position is valid based on number of kings and if a check had been missed and if pawns aren't in valid position
         kingCount = self.countPiece( King ) 
-        if (kingCount[ColorChar.WHITE]!= 1) or (kingCount[ColorChar.BLACK]!= 1) or self.inCheck( self.toMove.opponent() ) or self.illegalPawnPlacement(): 
-            return 'invalid' 
+        if (kingCount[ColorChar.WHITE]!= 1) or (kingCount[ColorChar.BLACK]!= 1) or self.inCheck( self.toMove.opponent ) or self.illegalPawnPlacement(): 
+            # return 'invalid' 
+            return PositionStatus.INVALID 
 
         elif self.halfMoveClock == 100: 
-            return 'draw 50 Move Rule' 
+            # return 'draw 50 Move Rule' 
+            return PositionStatus.FIFTY_MOVE_DRAW
 
         # elif value of FEN dictionary is 3 : return 'draw 3 fold repetition'   
 
         elif len( self.getLegalMoves( self.toMove ) ) == 0: 
-            if self.inCheck( self.toMove ): 
-                return 'checkmate' 
+            if self.inCheck( self.toMove ) and self.toMove == ColorChar.WHITE: 
+                return PositionStauts.WHITE_WINS 
+            elif self.inCheck( self.toMove ) and self.toMove == ColorChar.BLACK: 
+                return PositionStauts.BLACK_WINS
+                #return 'checkmate' 
             else: 
-                return 'stalemate' 
+                # return 'stalemate' 
+                return PositionStatus.STALEMATE 
 
-        # check if position is valid based on number of kings and if a
-        # check had been missed and if pawns aren't in valid position
-        kingCount = self.countPiece(King)
-        if kingCount[ColorChar.WHITE] != 1 or kingCount[ColorChar.BLACK] != 1 \
-                or self.inCheck(self.toMove.opponent) or self.illegalPawnPlacement():
-            return 'invalid'
+        if any( value > 2 for value in self.positionHistory.values() ) : 
+            return PositionStatus.THREEFOLD_DRAW
 
-        if self.halfMoveClock == 100:
-            return 'draw 50 Move Rule'
+        # if the material is not enough to mate 
+        material = self.materialCount() 
+        pawnCount = self.countPiece(Pawn) 
+        if not any( val > 0 for val in  pawnCount.values() ) and material[ColorChar.WHITE] + material[ColorChar.BLACK] < 4: 
+            return PositionStatus.INSUFFICIENT_DRAW  # for now ignore insufficient draw of K + B vs K + B if bishop on same color squares 
 
-        # if value of FEN dictionary is 3 : return 'draw 3 fold repetition'
+        return PositionStatus.IN_PLAY
 
-        if len(self.getLegalMoves(self.toMove)) == 0:
-            if self.inCheck(self.toMove):
-                return 'checkmate'
-            return 'stalemate'
 
-        return 'okay'
+
+    # # Functions used to evaluate the position 
+
+    def materialCount(self ) -> dict[ColorChar, int]: 
+        """Counts the relative value of material on the board for white and black""" 
+        material = {ColorChar.WHITE: 0, ColorChar.BLACK: 0} 
+        for _, _, piece in self.enumerateBoard():
+            if piece and not isinstance(piece,King):
+                material[piece.color] += piece.value
+
+        return material 
+
+
+
+
