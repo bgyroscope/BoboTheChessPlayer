@@ -456,6 +456,56 @@ class Position:
 
         return outstr[:-1]    # remove accidentally over included '/'
 
+
+    def moveToAlgebraic(self, move: Move) -> str: 
+        """ BEFORE move is executed, express the algebraic notation of the move. """ 
+        # assume that move has not yet been executed
+        beginrow, begincol  = move.begin
+        endrow, endcol  = move.end
+        piece = self._board[beginrow][begincol] 
+
+        # add a + for check. # for checkmate eventually 
+        checkStr = '' 
+        if self.inCheck( self.toMove ): 
+            checkStr = '+'
+        # if checkmate... '#' 
+
+        if isinstance( move, Castle): 
+            if endcol > begincol: 
+                return '0-0' + checkStr  # kingside castle 
+            else: 
+                return '0-0-0' + checkStr  # queenside castle 
+
+        promoStr = ''
+        # if  promotion... (Q)  
+
+        captStr = '' 
+        if isinstance( move, Capture ): 
+            captStr = 'x'
+
+        if isinstance( piece, Pawn): 
+            if isinstance( move, Capture ): 
+                headStr = FEN.coordToSquare( move.begin ) [0] 
+            else: 
+                headStr = '' 
+       
+        else: 
+            headStr = piece.char.value.upper()
+
+            # check no other piece can get to that square. 
+            allMoves = self.getLegalMoves(self.toMove )
+            for tempMove in allMoves: 
+                if (tempMove.end == move.end) and (tempMove.begin != move.begin) and isinstance( self._board[tempMove.begin[0]][tempMove.begin[1]], type(piece) ) : 
+                    # Another piece of the same type can move to the end square  
+
+                    if tempMove.begin[0] == move.begin[0]: 
+                        headStr += FEN.coordToSquare(move.begin)[0]   # get letter of beginning square 
+                    else: 
+                        headStr += FEN.coordToSquare(move.begin)[1]   # get number of beginning square 
+
+        return headStr + captStr + FEN.coordToSquare(move.end) + promoStr + checkStr 
+
+
     def findKing(self, color: ColorChar) -> Coord:
         """Returns the position of the king of the given color"""
 
@@ -536,8 +586,7 @@ class Position:
 
 
 
-    # # Functions used to evaluate the position 
-
+    # # Functions used to evaluate the position -------------------------------- 
     def materialCount(self ) -> dict[ColorChar, int]: 
         """Counts the relative value of material on the board for white and black""" 
         material = {ColorChar.WHITE: 0, ColorChar.BLACK: 0} 
@@ -546,6 +595,10 @@ class Position:
                 material[piece.color] += piece.value
 
         return material 
+
+
+    # def findCheckmate(self) -> 
+
 
 
 
