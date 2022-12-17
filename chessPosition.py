@@ -1,6 +1,10 @@
 from typing import Iterator
 
-from typedefs import PieceChar, ColorChar, Coord
+from typedefs import (
+    PieceChar,
+    ColorChar,
+    Coord
+)
 import fen as FEN
 from fen import STANDARD_START_POSITION
 from chessMove import (
@@ -9,6 +13,9 @@ from chessMove import (
     EnPassant,
     PawnPush,
     PawnDoublePush,
+    PawnPromotion,
+    PromotionByPush,
+    PromotionByCapture,
     Castle
 )
 import chessPiece
@@ -127,9 +134,11 @@ class Position:
             return 0
         return len(self._board[0])
 
-    # define home rows for pawns and home squares for rooks
     def _pawnHomeRow(self, color: ColorChar) -> int:
         return (self.numRows - 2) if color == ColorChar.WHITE else 1
+
+    def _pawnPromoteRow(self, color: ColorChar) -> int:
+        return 0 if color == ColorChar.WHITE else (self.numRows - 1)
 
     def _rookHomeSquare(self, color: ColorChar, side: PieceChar) -> Coord:
         row = (self.numRows - 1) if color == ColorChar.WHITE else 0
@@ -184,7 +193,7 @@ class Position:
         return [move for move in moves if not self.moveIntoCheck(move)]
 
     def _getPiecePseudoLegalMoves(self, row: int, col: int, piece: Piece) -> list[Move]:
-        moves = []
+        moves: list[Move] = []
         start = (row, col)
 
         if piece.moveRange == chessPiece.MAX_RANGE:
@@ -212,6 +221,8 @@ class Position:
                 # move = Move(start,end)
                 if isinstance(piece, Pawn) and i == 2:
                     move = PawnDoublePush(start, end)
+                elif isinstance(piece, Pawn) and end[0] == self._pawnPromoteRow(piece.color):
+                    move = PromotionByPush(start, end)
                 else:
                     move = Move(start, end)
                 moves.append(move)
@@ -221,14 +232,11 @@ class Position:
 
         return moves
 
-    def _getPiecePseudoLegalCastle(self, row: int, col: int, piece: Piece) -> list[Move]:
+    def _getPiecePseudoLegalCastle(self, row: int, col: int, piece: King) -> list[Move]:
         """Since castling is such a unique move, it will be handled separately here."""
 
-        if not isinstance(piece, King):
-            return []
-
+        moves: list[Move] = []
         start = (row, col)
-        moves = []
         # Check both kingside and queenside
         for side in [PieceChar.KING, PieceChar.QUEEN]:
             if not self.castleRights[self.toMove][side]:
@@ -256,7 +264,7 @@ class Position:
         return moves
 
     def _getPiecePseudoLegalCaptures(self, row: int, col: int, piece: Piece) -> list[Move]:
-        captures = []
+        captures: list[Move] = []
         start = (row, col)
 
         attacks = self._getPieceAttacks(row, col, piece)
@@ -266,7 +274,10 @@ class Position:
             end = (newr, newc)
 
             if target is not None:
-                captures.append(Capture(start, end))
+                if isinstance(piece, Pawn) and end[0] == self._pawnPromoteRow(piece.color):
+                    captures.append(PromotionByCapture(start, end))
+                else:
+                    captures.append(Capture(start, end))
 
             # Check for en passant availability
             if isinstance(piece, Pawn) and end == self.epTarget:
@@ -320,7 +331,7 @@ class Position:
 
         piece = self._board[startRow][startCol]
         if piece is None:
-            return
+            raise Exception("Attempting to move non-existent piece!")
 
         # Handles both moving & (normal) capturing
         self._board[endRow][endCol] = piece
@@ -335,10 +346,8 @@ class Position:
                 self._board[endRow - 1][endCol] = None
 
         # Pawn promotion
-        if isinstance(piece, Pawn) and \
-                ((piece.color == ColorChar.WHITE and endRow == 0)
-                 or (piece.color == ColorChar.BLACK and endRow == self.numRows - 1)):
-            self._board[endRow][endCol] = Queen(piece.color)
+        if isinstance(move, PawnPromotion):
+            self._board[endRow][endCol] = self._createPiece(move.toPiece, piece.color)
 
         # Castling
         if isinstance(move, Castle):

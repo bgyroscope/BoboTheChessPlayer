@@ -12,6 +12,7 @@ class Game:
 
     players: dict[ColorChar, Player]
     position: Position
+
     _moveQueue: (Iterator[(None | Move)] | None)
 
     def __init__(self,
@@ -32,9 +33,8 @@ class Game:
         """
         activePlayer = self.players[self.position.toMove]
         if self._moveQueue is None:
-            position = self.position
             moves = self.position.getLegalMoves(self.position.toMove)
-            self._moveQueue = activePlayer.decideMove(position, moves)
+            self._moveQueue = activePlayer.decideMove(self.position, moves)
 
         move = next(self._moveQueue)
         if move is not None:

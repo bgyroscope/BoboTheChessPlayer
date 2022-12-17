@@ -9,7 +9,7 @@ begin -- where the piece starts
 end -- where the piece ends
 """
 
-from typedefs import Coord
+from typedefs import PieceChar, Coord
 
 
 class Move:
@@ -51,11 +51,29 @@ class PawnDoublePush(PawnPush):
         return super().__str__() + " as a pawn double push."
 
 
-class PawnPromotion(PawnPush):
-    """A pawn promotion, whether by push or capture"""
+class PawnPromotion(Move):
+    """Base class for pawn promotions"""
+
+    def __init__(self, begin: Coord, end: Coord):
+        super().__init__(begin, end)
+        self.toPiece = PieceChar.QUEEN
 
     def __str__(self):
-        return super().__str__() + " as a pawn promotion."
+        return super().__str__() + " as a pawn promotion"
+
+
+class PromotionByPush(PawnPromotion, PawnPush):
+    """A pawn promotion by simple movement"""
+
+    def __str__(self):
+        return super().__str__() + " by push."
+
+
+class PromotionByCapture(PawnPromotion, Capture):
+    """A pawn promotion by capturing another piece"""
+
+    def __str__(self):
+        return super().__str__() + " by capture."
 
 
 class Castle(Move):
