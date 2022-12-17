@@ -44,7 +44,8 @@ from gui.displayable import (
     Image,
     Panel,
     Grid,
-    Button
+    Button,
+    ImageButton
 )
 
 SQUARE_HOVER_COLOR = (192, 192, 0, 128)
@@ -135,7 +136,8 @@ class Board(Container):
             else:
                 width, height = self.size
                 location = (width // 2, height // 2)
-                self._panel.add(self._promotionPopup, location, pivot=(0.5, 0.5))
+                self._panel.add(self._promotionPopup,
+                                location, pivot=(0.5, 0.5))
 
         # Highlighted squares
         if self._selectedSquare is not None:
@@ -266,12 +268,9 @@ class PromotionPopUp(Container):
         chars = [PieceChar.KNIGHT, PieceChar.BISHOP,
                  PieceChar.ROOK, PieceChar.QUEEN]
         for char, sprite in zip(chars, sprites):
-            width, height = sprite.size
-            button = Button(width,
-                            height,
-                            (0, 0, 0),
-                            (255, 255, 255),
-                            partial(self._setSelectedPiece, char))
+            button = ImageButton(sprite,
+                                 SQUARE_HOVER_COLOR,
+                                 partial(self._setSelectedPiece, char))
             buttons.append(button)
         return buttons
 

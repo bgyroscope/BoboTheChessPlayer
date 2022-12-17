@@ -323,7 +323,7 @@ class Button(Displayable):
                  height: int,
                  idleColor: Color,
                  hoverColor: Color,
-                 onClick: (Callable | None) = None):
+                 onClick: (Callable[[], None] | None) = None):
         super().__init__()
 
         self._size = (width, height)
@@ -359,13 +359,24 @@ class Button(Displayable):
         return super().handle(event)
 
 
-# class ImageButton(Button):
-#     def __init__(self,
-#                  image: Image,
-#                  onClick: Callable,
-#                  hoverColor: Color):
-#         width, height = image.getBounds().size
-#         super().__init__(width, height, (0, 0, 0, 0), hoverColor, onClick)
+class ImageButton(Button):
+    """A button with an image for its background"""
 
-#     def render(self) -> Surface:
-#         return super().render()
+    def __init__(self,
+                 image: Image,
+                 hoverColor: Color,
+                 onClick: Callable[[], None]):
+        width, height = image.size
+        super().__init__(width, height, (0, 0, 0, 0), hoverColor, onClick)
+
+        self._image = image
+        self._highlight = Solid(*self.size, self.hoverColor)
+
+    def render(self) -> Surface:
+        surface = self._image.render()
+
+        if self._hovered:
+            highlight = self._highlight.render()
+            surface.blit(highlight, (0, 0))
+
+        return surface
