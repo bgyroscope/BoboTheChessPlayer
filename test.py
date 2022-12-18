@@ -4,10 +4,10 @@
 
 import pygame 
 
-import gui
-from gui import Display
+import gui.display as display
+from gui.display import Display
 from chessGame import Game
-from chessBoard import Board
+from chessBoardDisplay import Board
 
 from typedefs import PieceChar, ColorChar, Coord
 
@@ -77,8 +77,8 @@ else:
     game = Game(initialFEN)
     # game = Game()
     
-    boardImage = gui.loadImage('images/chess_board.png')
-    piecesImage = gui.loadImage('images/chess_pieces.png')
+    boardImage = display.loadImage('images/chess_board.png')
+    piecesImage = display.loadImage('images/chess_pieces.png')
     board = Board(game, boardImage, piecesImage)
    
 
@@ -87,7 +87,7 @@ else:
     window.add(board, (0, 0))
     window.show()
     
-    while window.state != gui.QUIT:
+    while window.state != display.QUIT:
         window.tick()
     
     pygame.quit()

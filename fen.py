@@ -7,6 +7,7 @@ from typedefs import Coord
 
 STANDARD_START_POSITION = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
 
+
 def squareToCoord(square: str) -> Coord:
     """Converts a square location a1 etc. to the corresponding (row, col) tuple"""
     rowDict = {'1': 7, '2': 6, '3': 5, '4': 4, '5': 3, '6': 2, '7': 1, '8': 0}
@@ -27,48 +28,3 @@ def coordToSquare(coord: Coord) -> str:
         raise ValueError('Invalid row,col array in function numToCoor')
 
     return colDict[coord[1]] + rowDict[coord[0]]
-
-
-# class FEN:
-#     def getBoardStr(self):
-
-#         outstr = ''
-#         for r in range(self.nrows):
-#             j = 0
-#             for c in range(self.nrows):
-#                 if self._board[r][c] == None:
-#                     j += 1
-
-#                 else:
-#                     outstr = outstr + str(j) + str(self._board[r][c])
-#                     j = 0
-
-#             if j != 0:
-#                 outstr += str(j)
-
-#             outstr += '/'
-
-#         return outstr[:-1]  # remove accidentally over included '/'
-
-#     def updateFEN(self, move):
-#         '''
-#         update the FEN after a move
-#           move -- a move object or subclass of move object, the flags are within the move motion
-#           eventually include a flags argument for special moves
-#         '''
-
-#         tempBoardStr = self.getBoardStr()
-
-#         # ep rights
-#         if isinstance(move, chessMove.PawnTwoSquare):
-#             r, c = gf.coorToNum(move.end)
-#             if self.toMove == 'w':  # white is making the pawn move
-#                 self.epTarget = gf.numToCoor([r+1, c])
-#             else:  # black made the pawn move
-#                 self.epTarget = gf.numToCoor([r-1, c])
-
-#         else:
-#             self.epTarget = '-'   # ep only applies for the first available move
-
-#         self.FEN = ' '.join([tempBoardStr, self.toMove, self.castleRights, self.epTarget, str(
-#             self.halfMoveClock), str(self.fullMoveNumber)])
