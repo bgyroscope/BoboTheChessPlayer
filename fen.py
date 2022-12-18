@@ -5,6 +5,7 @@
 
 from typedefs import Coord
 
+
 STANDARD_START_POSITION = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
 
 
@@ -28,3 +29,5 @@ def coordToSquare(coord: Coord) -> str:
         raise ValueError('Invalid row,col array in function numToCoor')
 
     return colDict[coord[1]] + rowDict[coord[0]]
+
+

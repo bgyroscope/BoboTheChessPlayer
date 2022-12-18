@@ -29,6 +29,7 @@ class Piece(ABC):
 
     char: PieceChar
     color: ColorChar
+    value: int
 
     def __init__(self, char: PieceChar, color: ColorChar):
         """
@@ -38,6 +39,7 @@ class Piece(ABC):
         """
         self.char = char
         self.color = color
+        self.value = 1
 
     @property
     @abstractmethod
@@ -81,7 +83,6 @@ class Pawn(Piece):
 
     @property
     def moveRange(self) -> int:
-        # return 2 if not self.hasMoved else 1
         return 1
 
     @property
@@ -100,6 +101,7 @@ class Knight(Piece):
 
     def __init__(self, color: ColorChar):
         super().__init__(PieceChar.KNIGHT, color)
+        self.value = 3
 
     @property
     def moveDirection(self) -> list[Vector]:
@@ -116,6 +118,7 @@ class Bishop(Piece):
 
     def __init__(self, color: ColorChar):
         super().__init__(PieceChar.BISHOP, color)
+        self.value = 3
 
     @property
     def moveDirection(self) -> list[Vector]:
@@ -131,6 +134,7 @@ class Rook(Piece):
 
     def __init__(self, color: ColorChar):
         super().__init__(PieceChar.ROOK, color)
+        self.value = 5
 
     @property
     def moveDirection(self) -> list[Vector]:
@@ -146,6 +150,7 @@ class Queen(Piece):
 
     def __init__(self, color: ColorChar):
         super().__init__(PieceChar.QUEEN, color)
+        self.value = 9
 
     @property
     def moveDirection(self) -> list[Vector]:
@@ -162,6 +167,7 @@ class King(Piece):
 
     def __init__(self, color: ColorChar):
         super().__init__(PieceChar.KING, color)
+        self.value = None
 
     @property
     def moveDirection(self) -> list[Vector]:
