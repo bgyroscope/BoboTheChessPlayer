@@ -8,23 +8,26 @@ Class devoted to defining a player and the subclasses. It will include method fo
 """
 
 import random
+from abc import ABC, abstractmethod
 from typing import Iterator
 
 from typedefs import ColorChar
+from chessPosition import Position
 from chessMove import Move
 from chessPiece import Piece
 
 BoardArray = list[list[(Piece | None)]]
 
 
-class Player:
+class Player(ABC):
     """Abstract class for a player that can select moves in a game of chess"""
 
     def __init__(self, color: ColorChar):
         self.color = color
 
+    @abstractmethod
     def decideMove(self,
-                   board: BoardArray,
+                   board: Position,
                    possMoves: list[Move]) -> Iterator[(None | Move)]:
         """Starts the player's move decision process
 
@@ -35,8 +38,6 @@ class Player:
         Yields:
             Iterator: yields None until a move has been decided on
         """
-        raise NotImplementedError(
-            "Child class does not implement decideMove method")
 
     def __str__(self):
         return f"{self.color} player"
@@ -55,6 +56,8 @@ class Human(Player):
                    board: BoardArray,
                    possMoves: list[Move]) -> Iterator[(None | Move)]:
         self.availableMoves = possMoves
+
+        self.selectedMove = None
         while self.selectedMove is None:
             yield None
         yield self.selectedMove

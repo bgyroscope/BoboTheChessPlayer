@@ -8,6 +8,7 @@ from typedefs import Coord
 
 STANDARD_START_POSITION = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
 
+
 def squareToCoord(square: str) -> Coord:
     """Converts a square location a1 etc. to the corresponding (row, col) tuple"""
     rowDict = {'1': 7, '2': 6, '3': 5, '4': 4, '5': 3, '6': 2, '7': 1, '8': 0}
@@ -28,12 +29,5 @@ def coordToSquare(coord: Coord) -> str:
         raise ValueError('Invalid row,col array in function numToCoor')
 
     return colDict[coord[1]] + rowDict[coord[0]]
-
-
-
-
-
-
-
 
 

@@ -118,5 +118,11 @@ Color = (ColorRGB | ColorRGBA)
 Coord = tuple[int, int]
 """An (x, y) coordinate pair"""
 
+Size = tuple[int, int]
+"""A (width, height) pair"""
+
+NormCoord = tuple[float, float]
+"""An (x, y) pair of floats normalized between 0.0 and 1.0"""
+
 Vector = tuple[int, int]
-"""A 2-tuple meant to represent a direction"""
+"""A 2-tuple representing a direction"""

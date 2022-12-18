@@ -1,26 +1,19 @@
-from typedefs import ColorChar
 from typing import Iterator
-from chessMove import (
-    Move,
-    Capture,
-    EnPassant,
-    PawnPush,
-    PawnDoublePush,
-    Castle
-)
 
-
-
+from typedefs import ColorChar
+from chessMove import Move
 from chessPlayer import Player
-from chessPosition import Position 
+from chessPosition import Position
 from fen import STANDARD_START_POSITION
 
-class Game:  
+
+class Game:
+    """Handles player decision logic"""
 
     players: dict[ColorChar, Player]
     position: Position
-    _moveQueue: (Iterator[(None | Move)] | None)
 
+    _moveQueue: (Iterator[(None | Move)] | None)
 
     def __init__(self,
                  whitePlayer: Player,
@@ -40,14 +33,10 @@ class Game:
         """
         activePlayer = self.players[self.position.toMove]
         if self._moveQueue is None:
-            position = self.position
             moves = self.position.getLegalMoves(self.position.toMove)
-            self._moveQueue = activePlayer.decideMove(position, moves)
+            self._moveQueue = activePlayer.decideMove(self.position, moves)
 
         move = next(self._moveQueue)
         if move is not None:
             self.position.executeMove(move)
             self._moveQueue = None
-
-
-

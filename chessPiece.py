@@ -13,17 +13,18 @@ Attributes:
                             specialDirection, specialStep for initial double step
 """
 
+from abc import ABC, abstractmethod
+
 from typedefs import (
     PieceChar,
     ColorChar,
     Vector
 )
 
-
 MAX_RANGE = -1
 
 
-class Piece:
+class Piece(ABC):
     """A generic chess piece"""
 
     char: PieceChar
@@ -41,17 +42,14 @@ class Piece:
         self.value = 1
 
     @property
+    @abstractmethod
     def moveDirection(self) -> list[Vector]:
         """A list of directions the piece can move"""
 
-        raise NotImplementedError(
-            "Child class does not implement moveDirection")
-
     @property
+    @abstractmethod
     def moveRange(self) -> int:
         """The maximum number of squares the piece can move"""
-
-        raise NotImplementedError("Child class does not implement moveRange")
 
     @property
     def attackDirection(self) -> list[Vector]:
