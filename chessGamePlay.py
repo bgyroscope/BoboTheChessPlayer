@@ -74,7 +74,7 @@ class AI_Game:
        
 
         tempcount = 0
-        tempcountLimit = 10
+        tempcountLimit = 1000
         while self.position.getPositionStatus() == PositionStatus.IN_PLAY and tempcount < tempcountLimit :
             activePlayer = self.players[self.position.toMove]
             moves = self.position.getLegalMoves(self.position.toMove)
@@ -101,11 +101,6 @@ class AI_Game:
         positionStatus = self.position.getPositionStatus() 
         self.outcome = positionStatus.result
         self.positionStatus = positionStatus
-  
-
-        print( positionStatus) 
-        print( "outcome is  ",  positionStatus.result.value ) 
-        print( "white points is  ",  self.outcome.value[ColorChar.WHITE]  ) 
 
         return ( self.outcome, self.positionStatus, self.PGN ) 
 
