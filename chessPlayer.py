@@ -21,8 +21,9 @@ BoardArray = list[list[(Piece | None)]]
 class Player(ABC):
     """Abstract class for a player that can select moves in a game of chess"""
 
-    def __init__(self, color: ColorChar):
-        self.color = color
+    def __init__(self, nickname: str = 'unnamed'):
+        self.nickname = nickname
+        self.score = 0 
 
     @abstractmethod
     def decideMove(self,
@@ -39,16 +40,22 @@ class Player(ABC):
         """
 
     def __str__(self):
-        return f"{self.color} player"
+        return "Player ({})".format(self.nickname) 
 
+
+    def updateScore(self, pts: int): 
+        self.score += pts 
+
+    def resetScroe(self): 
+        self.score = 0 
 
 class Human(Player):
     """A human player. Moves are selected by the user"""
     availableMoves: list[Move]
     selectedMove: (Move | None)
 
-    def __init__(self, color: ColorChar):
-        super().__init__(color)
+    def __init__(self):
+        super().__init__()
         self.selectedMove = None
 
     def decideMove(self,

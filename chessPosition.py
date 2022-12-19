@@ -4,6 +4,7 @@ from typedefs import (
     PieceChar,
     ColorChar,
     PositionStatus,
+    Outcome,
     Coord
 )
 import fen as FEN
@@ -228,7 +229,10 @@ class Position:
                 if isinstance(piece, Pawn) and i == 2:
                     move = PawnDoublePush(start, end)
                 elif isinstance(piece, Pawn) and end[0] == self._pawnPromoteRow(piece.color):
-                    move = PromotionByPush(start, end)
+                    for pieceChar in ( PieceChar.QUEEN, PieceChar.KNIGHT, PieceChar.ROOK, PieceChar.BISHOP): 
+                        moves.append(PromotionByPush(start, end, pieceChar) )
+                    continue
+
                 else:
                     move = Move(start, end)
                 moves.append(move)
@@ -281,7 +285,11 @@ class Position:
 
             if target is not None:
                 if isinstance(piece, Pawn) and end[0] == self._pawnPromoteRow(piece.color):
-                    captures.append(PromotionByCapture(start, end))
+                    # captures.append(PromotionByCapture(start, end))
+                    for pieceChar in ( PieceChar.QUEEN, PieceChar.KNIGHT, PieceChar.ROOK, PieceChar.BISHOP): 
+                        captures.append(PromotionByCapture(start, end, pieceChar) )
+                    continue
+
                 else:
                     captures.append(Capture(start, end))
 
@@ -462,37 +470,43 @@ class Position:
 
         return outstr[:-1]    # remove accidentally over included '/'
 
-    def moveToAlgebraic(self, move: Move) -> str:
-        """ BEFORE move is executed, express the algebraic notation of the move. """
+    def moveToAlgebraic(self, move: Move) -> str: 
+        """ call BEFORE move is executed, express the algebraic notation of the move. """ 
         # assume that move has not yet been executed
-        beginrow, begincol = move.begin
-        _, endcol = move.end
+        beginrow, begincol  = move.begin
+        endrow, endcol  = move.end
+        piece = self._board[beginrow][begincol] 
 
-        piece = self._board[beginrow][begincol]
-        if piece is None:
-            raise Exception("Moving non-existent piece!")
+        # add a + for check. # for checkmate eventually 
+        checkStr = '' 
+        if self.putIntoCheckmate(move): 
+            checkStr = '#' 
+        elif self.putIntoCheck( move ): 
+            checkStr = '+'
 
-        # add a + for check. # for checkmate eventually
-        checkStr = '+' if self.inCheck(self.toMove) else ''
-        # if checkmate... '#'
-
-        if isinstance(move, Castle):
-            if endcol > begincol:
-                return '0-0' + checkStr  # kingside castle
-            return '0-0-0' + checkStr  # queenside castle
+        if isinstance( move, Castle): 
+            if endcol > begincol: 
+                return '0-0' + checkStr  # kingside castle 
+            else: 
+                return '0-0-0' + checkStr  # queenside castle 
 
         promoStr = ''
-        # if  promotion... (Q)
+        # if  promotion... (Q)  
+        if isinstance( move, PawnPromotion) : 
+            promoStr = '={}'.format(move.toPiece.value.upper())  
 
-        captStr = 'x' if isinstance(move, Capture) else ''
+        captStr = '' 
+        if isinstance( move, Capture ): 
+            captStr = 'x'
 
-        if isinstance(piece, Pawn):
-            if isinstance(move, Capture):
-                headStr = FEN.coordToSquare(move.begin)[0]
-            else:
-                headStr = ''
+        if isinstance( piece, Pawn): 
+            if isinstance( move, Capture ): 
+                headStr = FEN.coordToSquare( move.begin ) [0] 
+            else: 
+                headStr = '' 
+       
+        else: 
 
-        else:
             headStr = piece.char.value.upper()
 
             # check no other piece can get to that square.
@@ -537,6 +551,24 @@ class Position:
 
         return tempPosition.inCheck(self.toMove)
 
+    def putIntoCheck(self, move: Move) -> bool: 
+        """Returns whether the given move would put the opponent into check. """ 
+        
+        tempPosition = Position(self.fenStr)
+        tempPosition.executeMove(move)
+
+        return tempPosition.inCheck(tempPosition.toMove)
+
+    def putIntoCheckmate(self, move: Move) -> bool:
+        """Returns whether the given move would put the opponent into check. """ 
+
+        tempPosition = Position(self.fenStr)
+        tempPosition.executeMove(move)
+        legalMoves = tempPosition.getLegalMoves(tempPosition.toMove) 
+
+        return self.putIntoCheck(move) and len( legalMoves) == 0 
+
+
     def countPiece(self, pieceToFind: type[Piece]) -> dict[ColorChar, int]:
         """Find the number of piece of each color on the board"""
 
@@ -567,8 +599,6 @@ class Position:
 
         if self.halfMoveClock == 100:
             return PositionStatus.FIFTY_MOVE_DRAW
-
-        # if value of FEN dictionary is 3 : return 'draw 3 fold repetition'
 
         if len(self.getLegalMoves(self.toMove)) == 0:
             if self.inCheck(self.toMove):

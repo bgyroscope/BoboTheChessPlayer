@@ -54,12 +54,13 @@ class PawnDoublePush(PawnPush):
 class PawnPromotion(Move):
     """Base class for pawn promotions"""
 
-    def __init__(self, begin: Coord, end: Coord):
+    def __init__(self, begin: Coord, end: Coord, toPiece: PieceChar = PieceChar.QUEEN):
         super().__init__(begin, end)
-        self.toPiece = PieceChar.QUEEN
+        # self.toPiece = PieceChar.QUEEN
+        self.toPiece = toPiece
 
     def __str__(self):
-        return super().__str__() + " as a pawn promotion"
+        return super().__str__() + " as a pawn promotion to " + str(self.toPiece) 
 
 
 class PromotionByPush(PawnPromotion, PawnPush):

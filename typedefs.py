@@ -45,9 +45,16 @@ class ColorChar(Enum):
         return colorNames[self]
 
 class Outcome(Enum): 
-    WHITE_WINS = (1.0, 0.0)
-    BLACK_WINS = (0,0, 1.0) 
-    DRAW = (0.5, 0.5) 
+    # WHITE_WINS = (1.0, 0.0)
+    # BLACK_WINS = (0,0, 1.0) 
+    # DRAW = (0.5, 0.5) 
+
+    WHITE_WINS = {ColorChar.WHITE: 1.0, ColorChar.BLACK: 0.0} 
+    BLACK_WINS = {ColorChar.WHITE: 0.0, ColorChar.BLACK: 1.0} 
+    DRAW = {ColorChar.WHITE: 0.5, ColorChar.BLACK: 0.5} 
+
+
+
 
     def __str__(self): 
         outcomeNames = { 
