@@ -219,6 +219,11 @@ class Board(Container):
                 (move for move in moves if move.end == coords), None)
             if selectedMove is not None:
                 if isinstance(selectedMove, PawnPromotion):
+                    # add pop up here .... 
+                    # select a piece with the pop up 
+                    # that selects the promotion property toPiece
+
+
                     self._tempMove = selectedMove
                     self._promoting = True
                 else:

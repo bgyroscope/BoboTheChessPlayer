@@ -4,7 +4,7 @@ from typedefs import (
     PieceChar,
     ColorChar,
     PositionStatus,
-    Outcome
+    Outcome,
     Coord
 )
 import fen as FEN
@@ -229,7 +229,11 @@ class Position:
                 if isinstance(piece, Pawn) and i == 2:
                     move = PawnDoublePush(start, end)
                 elif isinstance(piece, Pawn) and end[0] == self._pawnPromoteRow(piece.color):
-                    move = PromotionByPush(start, end)
+                    # move = PromotionByPush(start, end)
+                    for pieceChar in ( PieceChar.QUEEN, PieceChar.KNIGHT, PieceChar.ROOK, PieceChar.BISHOP): 
+                        moves.append(PromotionByPush(start, end, pieceChar) )
+                    continue
+
                 else:
                     move = Move(start, end)
                 moves.append(move)
@@ -282,7 +286,11 @@ class Position:
 
             if target is not None:
                 if isinstance(piece, Pawn) and end[0] == self._pawnPromoteRow(piece.color):
-                    captures.append(PromotionByCapture(start, end))
+                    # captures.append(PromotionByCapture(start, end))
+                    for pieceChar in ( PieceChar.QUEEN, PieceChar.KNIGHT, PieceChar.ROOK, PieceChar.BISHOP): 
+                        captures.append(PromotionByCapture(start, end, pieceChar) )
+                    continue
+
                 else:
                     captures.append(Capture(start, end))
 
