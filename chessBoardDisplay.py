@@ -134,7 +134,6 @@ class Board(Container):
                 self._tempMove = None
                 self._promoting = False
                 self._promotionPopup.selectedPiece = None
-
             else:
                 width, height = self.size
                 location = (width // 2, height // 2)

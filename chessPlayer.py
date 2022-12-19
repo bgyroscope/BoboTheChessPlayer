@@ -9,7 +9,6 @@ Class devoted to defining a player and the subclasses. It will include method fo
 
 import random
 from abc import ABC, abstractmethod
-from typing import Iterator
 
 from typedefs import ColorChar
 from chessPosition import Position
@@ -29,15 +28,15 @@ class Player(ABC):
     @abstractmethod
     def decideMove(self,
                    board: Position,
-                   possMoves: list[Move]) -> Iterator[(None | Move)]:
+                   possMoves: list[Move]) -> (Move | None):
         """Starts the player's move decision process
 
         Args:
             board (BoardArray): the current board position
             possMoves (list[Move]): the list of available moves
 
-        Yields:
-            Iterator: yields None until a move has been decided on
+        Returns:
+            the selected move, or None if a move has not been decided on
         """
 
     def __str__(self):
@@ -61,13 +60,13 @@ class Human(Player):
 
     def decideMove(self,
                    board: BoardArray,
-                   possMoves: list[Move]) -> Iterator[(None | Move)]:
+                   possMoves: list[Move]) -> (Move | None):
         self.availableMoves = possMoves
 
-        self.selectedMove = None
-        while self.selectedMove is None:
-            yield None
-        yield self.selectedMove
+        move = self.selectedMove
+        if move is not None:
+            self.selectedMove = None
+        return move
 
     def __str__(self):
         return super().__str__() + " is human."
@@ -78,8 +77,8 @@ class RandomComp(Player):
 
     def decideMove(self,
                    board: BoardArray,
-                   possMoves: list[Move]) -> Iterator[(None | Move)]:
-        yield random.choice(possMoves)
+                   possMoves: list[Move]) -> (Move | None):
+        return random.choice(possMoves)
 
     def __str__(self):
         return super().__str__() + " is random computer."

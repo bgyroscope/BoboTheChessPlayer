@@ -167,7 +167,7 @@ class King(Piece):
 
     def __init__(self, color: ColorChar):
         super().__init__(PieceChar.KING, color)
-        self.value = None
+        self.value = 0
 
     @property
     def moveDirection(self) -> list[Vector]:

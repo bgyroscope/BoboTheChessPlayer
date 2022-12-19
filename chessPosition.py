@@ -44,7 +44,7 @@ class Position:
     halfMoveClock: int
     fullMoveNumber: int
     fenStr: str
-    positionHistory: dict[str, int]   # dictionary of FEN without move counts  
+    positionHistory: dict[str, int]   # dictionary of FEN without move counts
 
     _board: BoardArray
 
@@ -80,12 +80,12 @@ class Position:
         self.halfMoveClock = int(temp[4])
         self.fullMoveNumber = int(temp[5])
 
-        # initial FEN 
+        # initial FEN
         self._updateFEN()
 
         # set for determining three fold repetition
         self.positionHistory = {}
-        self.positionHistory.setdefault( self._getPositionHistoryStr() , 1 )
+        self.positionHistory.setdefault(self._getPositionHistoryStr(), 1)
 
     def setPosition(self, position: str):
         """Sets the position of pieces on the board
@@ -361,7 +361,8 @@ class Position:
 
         # Pawn promotion
         if isinstance(move, PawnPromotion):
-            self._board[endRow][endCol] = self._createPiece(move.toPiece, piece.color)
+            self._board[endRow][endCol] = self._createPiece(
+                move.toPiece, piece.color)
 
         # Castling
         if isinstance(move, Castle):
@@ -415,16 +416,15 @@ class Position:
 
         self._updateFEN()
 
-        # add the updated position to the positionHistory 
-        positionHistoryStr = self._getPositionHistoryStr() 
-        self.positionHistory.setdefault( positionHistoryStr, 0 )
-        self.positionHistory[ positionHistoryStr ] += 1 
+        # add the updated position to the positionHistory
+        positionHistoryStr = self._getPositionHistoryStr()
+        self.positionHistory.setdefault(positionHistoryStr, 0)
+        self.positionHistory[positionHistoryStr] += 1
 
-        # print( self.positionHistory ) 
+        # print( self.positionHistory )
 
-    def _getPositionHistoryStr(self): 
-        return ' '.join( self.fenStr.split(' ')[0:4]   ) 
-
+    def _getPositionHistoryStr(self):
+        return ' '.join(self.fenStr.split(' ')[0:4])
 
     def _updateFEN(self):
         tempBoardStr = self._getBoardStr()
@@ -470,7 +470,6 @@ class Position:
 
         return outstr[:-1]    # remove accidentally over included '/'
 
-
     def moveToAlgebraic(self, move: Move) -> str: 
         """ call BEFORE move is executed, express the algebraic notation of the move. """ 
         # assume that move has not yet been executed
@@ -507,21 +506,27 @@ class Position:
                 headStr = '' 
        
         else: 
+
             headStr = piece.char.value.upper()
 
-            # check no other piece can get to that square. 
-            allMoves = self.getLegalMoves(self.toMove )
-            for tempMove in allMoves: 
-                if (tempMove.end == move.end) and (tempMove.begin != move.begin) and isinstance( self._board[tempMove.begin[0]][tempMove.begin[1]], type(piece) ) : 
-                    # Another piece of the same type can move to the end square  
+            # check no other piece can get to that square.
+            allMoves = self.getLegalMoves(self.toMove)
+            for tempMove in allMoves:
+                if (tempMove.end != move.end) or (tempMove.begin == move.begin):
+                    continue
 
-                    if tempMove.begin[0] == move.begin[0]: 
-                        headStr += FEN.coordToSquare(move.begin)[0]   # get letter of beginning square 
-                    else: 
-                        headStr += FEN.coordToSquare(move.begin)[1]   # get number of beginning square 
+                tempPiece = self._board[tempMove.begin[0]][tempMove.begin[1]]
+                if isinstance(tempPiece, type(piece)):
+                    # Another piece of the same type can move to the end square
 
-        return headStr + captStr + FEN.coordToSquare(move.end) + promoStr + checkStr 
+                    if tempMove.begin[0] == move.begin[0]:
+                        # get letter of beginning square
+                        headStr += FEN.coordToSquare(move.begin)[0]
+                    else:
+                        # get number of beginning square
+                        headStr += FEN.coordToSquare(move.begin)[1]
 
+        return headStr + captStr + FEN.coordToSquare(move.end) + promoStr + checkStr
 
     def findKing(self, color: ColorChar) -> Coord:
         """Returns the position of the king of the given color"""
@@ -585,47 +590,44 @@ class Position:
     def getPositionStatus(self) -> PositionStatus:
         """ returns a string the reports the status of a position and message describing """
 
-       
-        # check if position is valid based on number of kings and if a check had been missed and if pawns aren't in valid position
-        kingCount = self.countPiece( King ) 
-        if (kingCount[ColorChar.WHITE]!= 1) or (kingCount[ColorChar.BLACK]!= 1) or self.inCheck( self.toMove.opponent ) or self.illegalPawnPlacement(): 
-            return PositionStatus.INVALID 
+        # check if position is valid based on number of kings and if a
+        # check had been missed and if pawns aren't in valid position
+        kingCount = self.countPiece(King)
+        if (kingCount[ColorChar.WHITE] != 1) or (kingCount[ColorChar.BLACK] != 1) \
+                or self.inCheck(self.toMove.opponent) or self.illegalPawnPlacement():
+            return PositionStatus.INVALID
 
-        elif self.halfMoveClock == 100: 
+        if self.halfMoveClock == 100:
             return PositionStatus.FIFTY_MOVE_DRAW
 
-        elif len( self.getLegalMoves( self.toMove ) ) == 0: 
-            if self.inCheck( self.toMove ) and self.toMove == ColorChar.WHITE: 
-                return PositionStatus.BLACK_WINS
-            elif self.inCheck( self.toMove ) and self.toMove == ColorChar.BLACK: 
-                return PositionStatus.WHITE_WINS 
-            else: 
-                return PositionStatus.STALEMATE 
+        if len(self.getLegalMoves(self.toMove)) == 0:
+            if self.inCheck(self.toMove):
+                return PositionStatus.WHITE_WINS if self.toMove == ColorChar.WHITE \
+                    else PositionStatus.BLACK_WINS
+            return PositionStatus.STALEMATE
 
-        if any( value > 2 for value in self.positionHistory.values() ) : 
+        if any(value > 2 for value in self.positionHistory.values()):
             return PositionStatus.THREEFOLD_DRAW
 
-        # if the material is not enough to mate 
-        material = self.materialCount() 
-        pawnCount = self.countPiece(Pawn) 
-        if not any( val > 0 for val in pawnCount.values() ) and material[ColorChar.WHITE] + material[ColorChar.BLACK] < 4: 
-            return PositionStatus.INSUFFICIENT_DRAW  # for now ignore insufficient draw of K + B vs K + B if bishop on same color squares 
+        # if the material is not enough to mate
+        material = self.materialCount()
+        pawnCount = self.countPiece(Pawn)
+        if not any(val > 0 for val in pawnCount.values()) \
+                and material[ColorChar.WHITE] + material[ColorChar.BLACK] < 4:
+            # for now ignore insufficient draw of K + B vs K + B if bishop on same color squares
+            return PositionStatus.INSUFFICIENT_DRAW
 
         return PositionStatus.IN_PLAY
 
+    # # Functions used to evaluate the position --------------------------------
 
-
-    # # Functions used to evaluate the position -------------------------------- 
-    def materialCount(self ) -> dict[ColorChar, int]: 
-        """Counts the relative value of material on the board for white and black""" 
-        material = {ColorChar.WHITE: 0, ColorChar.BLACK: 0} 
+    def materialCount(self) -> dict[ColorChar, int]:
+        """Counts the relative value of material on the board for white and black"""
+        material = {ColorChar.WHITE: 0, ColorChar.BLACK: 0}
         for _, _, piece in self.enumerateBoard():
-            if piece and not isinstance(piece,King):
+            if piece and not isinstance(piece, King):
                 material[piece.color] += piece.value
 
-        return material 
+        return material
 
-
-    # def findCheckmate(self) -> 
-
-
+    # def findCheckmate(self) ->

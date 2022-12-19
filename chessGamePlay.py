@@ -1,5 +1,5 @@
-from typing import Iterator
 
+from typing import Iterator
 from typedefs import ColorChar, PositionStatus, Outcome
 from chessMove import Move
 from chessPlayer import Player
@@ -13,7 +13,7 @@ class Game:
     players: dict[ColorChar, Player]
     position: Position
 
-    _moveQueue: (Iterator[(None | Move)] | None)
+    _legalMoves: (list[Move] | None)
 
     def __init__(self,
                  whitePlayer: Player,
@@ -25,21 +25,20 @@ class Game:
         }
         self.position = Position(startPos)
 
-        self._moveQueue = None
+        self._legalMoves = None
 
     def update(self):
         """Checks if the active player has selected
         their move, and if so, executes it
         """
-        activePlayer = self.players[self.position.toMove]
-        if self._moveQueue is None:
-            moves = self.position.getLegalMoves(self.position.toMove)
-            self._moveQueue = activePlayer.decideMove(self.position, moves)
+        if self._legalMoves is None:
+            self._legalMoves = self.position.getLegalMoves(self.position.toMove)
 
-        move = next(self._moveQueue)
+        activePlayer = self.players[self.position.toMove]
+        move = activePlayer.decideMove(self.position, self._legalMoves)
         if move is not None:
             self.position.executeMove(move)
-            self._moveQueue = None
+            self._legalMoves = None
 
 
 
@@ -78,17 +77,13 @@ class AI_Game:
         while self.position.getPositionStatus() == PositionStatus.IN_PLAY and tempcount < tempcountLimit :
             activePlayer = self.players[self.position.toMove]
             moves = self.position.getLegalMoves(self.position.toMove)
-            nextMove  = next( activePlayer.decideMove(self.position, moves) ) 
+            nextMove  = activePlayer.decideMove(self.position, moves) 
            
             if self.position.toMove == ColorChar.WHITE: 
-                self.PGN += ' {}.'.format(self.position.fullMoveNumber) 
-
-            print( nextMove ) 
+                self.PGN += ' {}.'.format(self.position.fullMoveNumber)  
 
             self.PGN += ' ' + self.position.moveToAlgebraic(nextMove) 
             self.position.executeMove(nextMove) 
-
-            print( self.position.fenStr) 
 
             tempcount += 1
 
@@ -113,5 +108,3 @@ class AI_Game:
         for player in players: 
             player.resetScore()  
 
-
-# add a match file 
