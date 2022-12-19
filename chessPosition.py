@@ -229,7 +229,6 @@ class Position:
                 if isinstance(piece, Pawn) and i == 2:
                     move = PawnDoublePush(start, end)
                 elif isinstance(piece, Pawn) and end[0] == self._pawnPromoteRow(piece.color):
-                    # move = PromotionByPush(start, end)
                     for pieceChar in ( PieceChar.QUEEN, PieceChar.KNIGHT, PieceChar.ROOK, PieceChar.BISHOP): 
                         moves.append(PromotionByPush(start, end, pieceChar) )
                     continue
@@ -473,7 +472,7 @@ class Position:
 
 
     def moveToAlgebraic(self, move: Move) -> str: 
-        """ BEFORE move is executed, express the algebraic notation of the move. """ 
+        """ call BEFORE move is executed, express the algebraic notation of the move. """ 
         # assume that move has not yet been executed
         beginrow, begincol  = move.begin
         endrow, endcol  = move.end
@@ -481,9 +480,10 @@ class Position:
 
         # add a + for check. # for checkmate eventually 
         checkStr = '' 
-        if self.inCheck( self.toMove ): 
+        if self.putIntoCheckmate(move): 
+            checkStr = '#' 
+        elif self.putIntoCheck( move ): 
             checkStr = '+'
-        # if checkmate... '#' 
 
         if isinstance( move, Castle): 
             if endcol > begincol: 
@@ -493,6 +493,8 @@ class Position:
 
         promoStr = ''
         # if  promotion... (Q)  
+        if isinstance( move, PawnPromotion) : 
+            promoStr = '={}'.format(move.toPiece.value.upper())  
 
         captStr = '' 
         if isinstance( move, Capture ): 
@@ -544,6 +546,24 @@ class Position:
 
         return tempPosition.inCheck(self.toMove)
 
+    def putIntoCheck(self, move: Move) -> bool: 
+        """Returns whether the given move would put the opponent into check. """ 
+        
+        tempPosition = Position(self.fenStr)
+        tempPosition.executeMove(move)
+
+        return tempPosition.inCheck(tempPosition.toMove)
+
+    def putIntoCheckmate(self, move: Move) -> bool:
+        """Returns whether the given move would put the opponent into check. """ 
+
+        tempPosition = Position(self.fenStr)
+        tempPosition.executeMove(move)
+        legalMoves = tempPosition.getLegalMoves(tempPosition.toMove) 
+
+        return self.putIntoCheck(move) and len( legalMoves) == 0 
+
+
     def countPiece(self, pieceToFind: type[Piece]) -> dict[ColorChar, int]:
         """Find the number of piece of each color on the board"""
 
@@ -574,13 +594,11 @@ class Position:
         elif self.halfMoveClock == 100: 
             return PositionStatus.FIFTY_MOVE_DRAW
 
-        # elif value of FEN dictionary is 3 : return 'draw 3 fold repetition'   
-
         elif len( self.getLegalMoves( self.toMove ) ) == 0: 
             if self.inCheck( self.toMove ) and self.toMove == ColorChar.WHITE: 
-                return PositionStauts.WHITE_WINS 
+                return PositionStatus.BLACK_WINS
             elif self.inCheck( self.toMove ) and self.toMove == ColorChar.BLACK: 
-                return PositionStauts.BLACK_WINS
+                return PositionStatus.WHITE_WINS 
             else: 
                 return PositionStatus.STALEMATE 
 
@@ -590,7 +608,7 @@ class Position:
         # if the material is not enough to mate 
         material = self.materialCount() 
         pawnCount = self.countPiece(Pawn) 
-        if not any( val > 0 for val in  pawnCount.values() ) and material[ColorChar.WHITE] + material[ColorChar.BLACK] < 4: 
+        if not any( val > 0 for val in pawnCount.values() ) and material[ColorChar.WHITE] + material[ColorChar.BLACK] < 4: 
             return PositionStatus.INSUFFICIENT_DRAW  # for now ignore insufficient draw of K + B vs K + B if bishop on same color squares 
 
         return PositionStatus.IN_PLAY

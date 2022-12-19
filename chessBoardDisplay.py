@@ -129,10 +129,12 @@ class Board(Container):
             selectedPiece = self._promotionPopup.selectedPiece
             if selectedPiece is not None:
                 assert isinstance(self._tempMove, PawnPromotion)
-                self._tempMove.toPiece = selectedPiece
+                self._tempMove.toPiece = selectedPiece  # altering the actual move that player selcts
                 self._player.selectedMove = self._tempMove
                 self._tempMove = None
                 self._promoting = False
+                self._promotionPopup.selectedPiece = None
+
             else:
                 width, height = self.size
                 location = (width // 2, height // 2)
@@ -219,13 +221,13 @@ class Board(Container):
                 (move for move in moves if move.end == coords), None)
             if selectedMove is not None:
                 if isinstance(selectedMove, PawnPromotion):
-                    # add pop up here .... 
-                    # select a piece with the pop up 
-                    # that selects the promotion property toPiece
-
-
                     self._tempMove = selectedMove
                     self._promoting = True
+
+                    # below is to find all possible promotionMoves 
+                    # promotionMoves = [ move for move in moves if move.end == coords ]
+                    # self._player.selectedMove = promotionMoves[0]  
+
                 else:
                     self._player.selectedMove = selectedMove
             self._selectedSquare = None
