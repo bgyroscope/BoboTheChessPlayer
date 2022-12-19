@@ -6,7 +6,6 @@
 
 """This is the main program that iniitializes the game.
 """
-
 import pygame
 
 from typedefs import ColorChar
